@@ -141,3 +141,7 @@ Do not use for: refactoring, writing scripts from scratch, debugging business lo
 - Laravel
 - Inertia (laravel svelte template)
 - TailwindCSS
+
+# Design system
+
+read DESIGN.md file
