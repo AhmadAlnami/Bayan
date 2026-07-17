@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PHP for Java Developers</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #FBF9F5;
+  --surface: #FFFFFF;
+  --text: #1D1C24;
+  --text-muted: #6A6878;
+  --php: #6C6FB5;
+  --php-light: #F0EFFA;
+  --java: #E07030;
+  --java-light: #FDF3EC;
+  --border: #E9E4D8;
+  --code-bg: #1B1B26;
+  --inline-code-bg: #EEEAE1;
+  --link: #5558A0;
+  --sidebar-w: 200px;
+  --content-max: 960px;
+  --reading: 68ch;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  text-wrap: balance;
+  color: var(--text);
+}
+
+h1 { font-size: 2.4rem; line-height: 1.25; letter-spacing: -0.01em; }
+h2 { font-size: 1.6rem; line-height: 1.35; margin-top: 3rem; }
+h3 { font-size: 1.15rem; line-height: 1.4; margin-top: 2rem; font-family: "Segoe UI", system-ui, sans-serif; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ---- Layout ---- */
+
+.page {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+  max-width: calc(var(--sidebar-w) + var(--content-max));
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+nav.sidebar {
+  position: sticky;
+  top: 2rem;
+  align-self: start;
+  padding: 3rem 0 2rem 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+nav.sidebar h4 {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+nav.sidebar a {
+  display: block;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 0.15rem 0;
+  transition: color 0.15s;
+}
+
+nav.sidebar a:hover,
+nav.sidebar a:focus-visible {
+  color: var(--link);
+}
+
+nav.sidebar a:focus-visible {
+  outline: 2px solid var(--php);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+main {
+  padding: 3rem 2rem 5rem 3rem;
+  max-width: var(--reading);
+}
+
+main > * + * { margin-top: 0; }
+
+/* ---- Hero ---- */
+
+.hero {
+  margin-bottom: 3rem;
+}
+
+.hero h1 { margin-bottom: 0.5rem; }
+
+.hero .subtitle {
+  font-size: 1.15rem;
+  color: var(--text-muted);
+  max-width: 48ch;
+  line-height: 1.6;
+}
+
+.hero .accent-rule {
+  width: 3rem;
+  height: 3px;
+  background: var(--php);
+  margin: 1rem 0 0 0;
+  border: none;
+}
+
+/* ---- Concept map ---- */
+
+.concept-map {
+  margin: 2rem 0 3rem 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.concept-map table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.concept-map thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.concept-map thead th:first-child {
+  padding-left: 0;
+}
+
+.concept-map tbody td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.concept-map tbody td:first-child {
+  padding-left: 0;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.concept-map tbody td:nth-child(2) {
+  color: var(--php);
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.concept-map tbody td:nth-child(3) {
+  color: var(--text);
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.85rem;
+}
+
+.concept-map tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---- Sections ---- */
+
+.section + .section { margin-top: 1rem; }
+
+/* ---- Comparison blocks ---- */
+
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 1rem 0 0 0;
+}
+
+.comp-block {
+  background: var(--surface);
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.comp-block .comp-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 0.75rem 0.5rem 0.75rem;
+  border-left: 3px solid transparent;
+}
+
+.comp-block.php .comp-label {
+  color: var(--php);
+  background: var(--php-light);
+  border-left-color: var(--php);
+}
+
+.comp-block.java .comp-label {
+  color: var(--java);
+  background: var(--java-light);
+  border-left-color: var(--java);
+}
+
+.comp-block pre {
+  margin: 0;
+  padding: 1rem 0.75rem;
+  background: var(--code-bg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.comp-block pre code {
+  font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+
+/* ---- Prose ---- */
+
+p {
+  max-width: var(--reading);
+  margin: 0.85rem 0 0 0;
+}
+
+p + p { margin-top: 0.6rem; }
+
+.section p:first-of-type { margin-top: 0; }
+
+code:not(pre code) {
+  font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+  font-size: 0.88em;
+  background: var(--inline-code-bg);
+  padding: 0.15em 0.35em;
+  border-radius: 2px;
+  color: var(--text);
+}
+
+/* ---- Callout ---- */
+
+.callout {
+  margin: 2rem 0 0 0;
+  padding: 1.25rem 1.5rem;
+  background: var(--surface);
+  border-left: 3px solid var(--php);
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+.callout strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---- Diff table ---- */
+
+.diff-table {
+  margin: 1rem 0 0 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.diff-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.diff-table thead th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.diff-table thead th:first-child,
+.diff-table tbody td:first-child {
+  padding-left: 0;
+}
+
+.diff-table tbody td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+  vertical-align: top;
+}
+
+.diff-table tbody td:first-child {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.diff-table tbody td:nth-child(2) {
+  color: var(--php);
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.diff-table tbody td:nth-child(3) {
+  color: var(--text);
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.84rem;
+  white-space: nowrap;
+}
+
+.diff-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* ---- Footer ---- */
+
+footer {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 860px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  nav.sidebar {
+    display: none;
+  }
+
+  main {
+    padding: 2rem 1.25rem 3rem 1.25rem;
+  }
+
+  .comparison {
+    grid-template-columns: 1fr;
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.35rem; margin-top: 2.25rem; }
+
+  .hero .subtitle {
+    font-size: 1rem;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <nav class="sidebar" aria-label="Table of contents">
+    <h4>On this page</h4>
+    <a href="#start">Getting started</a>
+    <a href="#variables">Variables &amp; types</a>
+    <a href="#control">Control flow</a>
+    <a href="#arrays">Arrays &amp; maps</a>
+    <a href="#strings">String handling</a>
+    <a href="#oop">Classes &amp; objects</a>
+    <a href="#web">The web context</a>
+    <a href="#errors">Errors &amp; exceptions</a>
+    <a href="#gotchas">Watch out for</a>
+    <a href="#diff">Quick reference</a>
+  </nav>
+
+  <main>
+
+    <!-- Hero -->
+    <header class="hero">
+      <h1>PHP for Java developers</h1>
+      <p class="subtitle">You already know how to build software. This page maps what you know onto PHP&rsquo;s world &mdash; so you can be productive in an afternoon.</p>
+      <hr class="accent-rule" aria-hidden="true">
+    </header>
+
+    <!-- Concept map -->
+    <div class="concept-map" role="region" aria-label="Concept mapping" tabindex="0">
+      <table>
+        <thead>
+          <tr>
+            <th>Concept</th>
+            <th>PHP</th>
+            <th>Java equivalent</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Entry point</td><td>Any <code>.php</code> file</td><td><code>public static void main</code></td></tr>
+          <tr><td>Package / namespace</td><td><code>namespace App\Util;</code></td><td><code>package com.app.util;</code></td></tr>
+          <tr><td>Import</td><td><code>use App\Model\User;</code></td><td><code>import com.app.model.User;</code></td></tr>
+          <tr><td>Class autoloading</td><td>Composer PSR-4</td><td>Classpath scanning</td></tr>
+          <tr><td>Interface</td><td><code>interface Renderable</code></td><td><code>interface Renderable</code></td></tr>
+          <tr><td>Abstract class</td><td><code>abstract class Shape</code></td><td><code>abstract class Shape</code></td></tr>
+          <tr><td>Collection / array</td><td><code>array</code> (universal)</td><td><code>List</code>, <code>Map</code>, <code>Set</code></td></tr>
+          <tr><td>Dependency manager</td><td>Composer</td><td>Maven / Gradle</td></tr>
+          <tr><td>HTTP request</td><td><code>$_GET</code>, <code>$_POST</code></td><td><code>HttpServletRequest</code></td></tr>
+          <tr><td>Session</td><td><code>$_SESSION</code> superglobal</td><td><code>HttpSession</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Section: Getting started -->
+    <div class="section" id="start">
+      <h2>Getting started</h2>
+      <p>
+        PHP doesn&rsquo;t need a <code>main</code> method, a class wrapper, or a compile step.
+        Every <code>.php</code> file is an entry point. The interpreter runs top to bottom,
+        and anything outside <code>&lt;?php</code> tags is emitted as raw output.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+echo "Hello, World!";</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java</div>
+          <pre><code class="language-java">public class Main {
+    public static void main(String[] args) {
+        System.out.println("Hello, World!");
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <p>
+        PHP ships a built-in server for local development. No Tomcat, no WAR files &mdash; just run this from your project root:
+      </p>
+      <pre style="background:var(--code-bg);padding:0.75rem 1rem;overflow-x:auto;margin:0.6rem 0 0 0;font-size:0.84rem;"><code class="language-bash">php -S localhost:8000</code></pre>
+    </div>
+
+    <!-- Section: Variables -->
+    <div class="section" id="variables">
+      <h2>Variables and types</h2>
+      <p>
+        Every variable starts with <code>$</code>. PHP is dynamically typed &mdash; no <code>int</code>,
+        <code>String</code>, or <code>boolean</code> declarations. A variable holds whatever you
+        assign to it, and the runtime coerces types in most expressions.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+$name  = "Alice";
+$age   = 30;
+$price = 19.99;
+$items = ["book", "pen"];
+
+$result = $name . " is " . $age;
+// Concatenation uses . not +</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java</div>
+          <pre><code class="language-java">String name  = "Alice";
+int    age   = 30;
+double price = 19.99;
+String[] items = {"book", "pen"};
+
+String result = name + " is " + age;
+// + works for both addition and concat</code></pre>
+        </div>
+      </div>
+
+      <p>
+        PHP uses <code>.</code> for string concatenation, not <code>+</code>. The
+        <code>+</code> operator always does numeric addition and will cast strings to numbers
+        &mdash; a common source of bugs when switching from Java.
+      </p>
+    </div>
+
+    <!-- Section: Control flow -->
+    <div class="section" id="control">
+      <h2>Control flow</h2>
+      <p>
+        <code>if</code>, <code>else</code>, <code>while</code>, <code>for</code>, and
+        <code>switch</code> work almost identically. The big addition is
+        <code>foreach</code> &mdash; PHP&rsquo;s cleanest way to iterate arrays and maps.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+$scores = [92, 78, 85];
+
+foreach ($scores as $score) {
+    echo $score . "\n";
+}
+
+$user = ["name" => "Alice", "role" => "admin"];
+foreach ($user as $key => $value) {
+    echo "$key: $value\n";
+}</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java</div>
+          <pre><code class="language-java">int[] scores = {92, 78, 85};
+
+for (int score : scores) {
+    System.out.println(score);
+}
+
+Map&lt;String, String&gt; user = Map.of("name", "Alice", "role", "admin");
+for (var entry : user.entrySet()) {
+    System.out.println(entry.getKey() + ": " + entry.getValue());
+}</code></pre>
+        </div>
+      </div>
+
+      <p>
+        Double-quoted strings interpolate variables directly: <code>"Hello, $name"</code> works
+        without concatenation. Use curly braces for complex expressions:
+        <code>"{$user['name']}"</code>.
+      </p>
+    </div>
+
+    <!-- Section: Arrays -->
+    <div class="section" id="arrays">
+      <h2>Arrays &mdash; also maps</h2>
+      <p>
+        PHP has one data structure that does everything: the <code>array</code>. An array can be
+        an indexed list, an associative map (dictionary), or both at once. This is the biggest
+        mental-model shift from Java, where <code>List</code>, <code>Map</code>, and
+        <code>Set</code> are separate types with separate APIs.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+$list   = ["red", "green", "blue"];
+$map    = ["name" => "Alice", "age" => 30];
+$nested = [
+    ["id" => 1, "title" => "First"],
+    ["id" => 2, "title" => "Second"],
+];
+
+// Common array functions
+$count  = count($list);
+$filtered = array_filter($list, fn($v) => $v !== "green");
+$mapped   = array_map(fn($v) => strtoupper($v), $list);</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java</div>
+          <pre><code class="language-java">List&lt;String&gt; list = List.of("red", "green", "blue");
+Map&lt;String, Object&gt; map = Map.of("name", "Alice", "age", 30);
+List&lt;Map&lt;String, Object&gt;&gt; nested = List.of(
+    Map.of("id", 1, "title", "First"),
+    Map.of("id", 2, "title", "Second")
+);
+
+long count    = list.size();
+var  filtered = list.stream().filter(v -> !v.equals("green")).toList();
+var  mapped   = list.stream().map(String::toUpperCase).toList();</code></pre>
+        </div>
+      </div>
+
+      <p>
+        PHP ships with dozens of array functions (<code>array_filter</code>,
+        <code>array_map</code>, <code>array_reduce</code>, <code>array_merge</code>) that serve
+        the same role as Java streams. There&rsquo;s no method chaining &mdash; you compose with
+        nested function calls or assign intermediate variables.
+      </p>
+    </div>
+
+    <!-- Section: Strings -->
+    <div class="section" id="strings">
+      <h2>String handling</h2>
+      <p>
+        PHP treats strings as byte sequences with a rich function library. There&rsquo;s no
+        <code>StringBuilder</code> &mdash; concatenation is cheap enough for most cases, and
+        double-quoted interpolation covers the rest.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+$length  = strlen("hello");
+$upper   = strtoupper("hello");
+$contain = str_contains("hello world", "world");
+$replace = str_replace("cat", "dog", "the cat sat");
+$parts   = explode(",", "a,b,c");
+$joined  = implode("-", ["a", "b", "c"]);
+$sub     = substr("hello", 1, 3);  // "ell"</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java</div>
+          <pre><code class="language-java">int    length  = "hello".length();
+String upper   = "hello".toUpperCase();
+boolean contain = "hello world".contains("world");
+String replace = "the cat sat".replace("cat", "dog");
+String[] parts = "a,b,c".split(",");
+String joined  = String.join("-", "a", "b", "c");
+String sub     = "hello".substring(1, 4);  // "ell"</code></pre>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Needle, then haystack.</strong> PHP string functions take the
+        <em>search</em> argument first, the <em>subject</em> second:
+        <code>str_contains($haystack, $needle)</code> is the modern form (PHP 8.0+), but older
+        functions like <code>strpos($haystack, $needle)</code> follow the same order.
+      </div>
+    </div>
+
+    <!-- Section: OOP -->
+    <div class="section" id="oop">
+      <h2>Classes and objects</h2>
+      <p>
+        PHP&rsquo;s object model will feel familiar. Classes, constructors, inheritance,
+        interfaces, and abstract classes all exist. The syntax differences are small:
+        <code>$this</code> instead of just <code>this</code>, <code>-&gt;</code> instead of
+        <code>.</code> for member access, and visibility goes on each property individually.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+class User
+{
+    public function __construct(
+        private string $name,
+        private string $email,
+    ) {}
+
+    public function greet(): string
+    {
+        return "Hi, {$this->name}";
+    }
+}
+
+$user = new User("Alice", "alice@example.com");
+echo $user->greet();</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java</div>
+          <pre><code class="language-java">public class User {
+    private final String name;
+    private final String email;
+
+    public User(String name, String email) {
+        this.name = name;
+        this.email = email;
+    }
+
+    public String greet() {
+        return "Hi, " + this.name;
+    }
+}
+
+User user = new User("Alice", "alice@example.com");
+System.out.println(user.greet());</code></pre>
+        </div>
+      </div>
+
+      <p>
+        PHP 8 introduced constructor property promotion &mdash; declare visibility, type, and name
+        in the constructor signature and the property is created for you. No more repetitive
+        <code>$this->field = $field</code> boilerplate.
+      </p>
+
+      <p>
+        Interfaces and inheritance work as you&rsquo;d expect. PHP supports single inheritance
+        with <code>extends</code>, multiple interfaces with <code>implements</code>, and
+        <code>traits</code> for horizontal code reuse (like Java&rsquo;s default methods on
+        interfaces, but more flexible).
+      </p>
+    </div>
+
+    <!-- Section: Web context -->
+    <div class="section" id="web">
+      <h2>The web context</h2>
+      <p>
+        This is where PHP departs from Java most sharply. PHP was built for the web. Request
+        data arrives in <strong>superglobals</strong> &mdash; associative arrays that are
+        always in scope, no injection, no <code>HttpServletRequest</code> parameter binding.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+// /profile.php?id=42
+$id = $_GET["id"] ?? null;
+
+// Form POST
+$email = $_POST["email"] ?? "";
+
+// Session
+session_start();
+$_SESSION["user_id"] = 42;
+$userId = $_SESSION["user_id"] ?? null;
+
+// Request method
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    // handle form
+}</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java (Servlet)</div>
+          <pre><code class="language-java">// /profile?id=42
+String id = request.getParameter("id");
+
+// Form POST
+String email = request.getParameter("email");
+
+// Session
+HttpSession session = request.getSession();
+session.setAttribute("user_id", 42);
+Integer userId = (Integer) session.getAttribute("user_id");
+
+// Request method
+if ("POST".equals(request.getMethod())) {
+    // handle form
+}</code></pre>
+        </div>
+      </div>
+
+      <p>
+        Each HTTP request runs a fresh PHP process (or handles one in a pool). There&rsquo;s no
+        application state between requests unless you persist it &mdash; to a session, a
+        database, or a cache. This shared-nothing architecture is the reason PHP scales
+        horizontally with little ceremony, but it also means you can&rsquo;t keep things in
+        memory the way a long-running Java process can.
+      </p>
+    </div>
+
+    <!-- Section: Errors -->
+    <div class="section" id="errors">
+      <h2>Errors and exceptions</h2>
+      <p>
+        PHP historically mixed errors and exceptions, but PHP 8 has largely unified them.
+        Most internal errors now throw <code>Error</code> or <code>Exception</code> objects,
+        and <code>try/catch/finally</code> works the same way it does in Java.
+      </p>
+
+      <div class="comparison">
+        <div class="comp-block php">
+          <div class="comp-label">PHP</div>
+          <pre><code class="language-php">&lt;?php
+
+try {
+    $result = 10 / 0;
+} catch (DivisionByZeroError $e) {
+    error_log($e->getMessage());
+    echo "Cannot divide by zero.";
+} finally {
+    cleanup();
+}</code></pre>
+        </div>
+        <div class="comp-block java">
+          <div class="comp-label">Java</div>
+          <pre><code class="language-java">try {
+    int result = 10 / 0;
+} catch (ArithmeticException e) {
+    logger.error(e.getMessage());
+    System.out.println("Cannot divide by zero.");
+} finally {
+    cleanup();
+}</code></pre>
+        </div>
+      </div>
+
+      <p>
+        PHP does not have checked exceptions. You are never forced to declare or catch an
+        exception type. This matches modern Java practice (most teams avoid checked exceptions
+        anyway), but it means you rely on documentation and static analysis to know what a
+        method might throw.
+      </p>
+    </div>
+
+    <!-- Section: Gotchas -->
+    <div class="section" id="gotchas">
+      <h2>Watch out for</h2>
+      <p>These trip up Java developers more than anything else in their first week with PHP:</p>
+
+      <ol style="margin:1rem 0 0 1.5rem;max-width:var(--reading);line-height:1.75;">
+        <li>
+          <strong><code>==</code> is loose comparison.</strong>
+          <code>"123" == 123</code> is <code>true</code> because PHP coerces the string to an
+          integer. Use <code>===</code> (identical) for strict type-and-value comparison, just
+          like you use <code>.equals()</code> vs <code>==</code> in Java.
+        </li>
+        <li>
+          <strong>Arrays pass by value.</strong> Assigning an array to another variable creates
+          a copy. Use <code>&amp;$array</code> to pass by reference, or work with objects
+          (which do pass by reference).
+        </li>
+        <li>
+          <strong>No method overloading.</strong> You can&rsquo;t define the same method twice
+          with different signatures. Use default arguments, variadic parameters, or check types
+          inside a single method body.
+        </li>
+        <li>
+          <strong><code>null</code> and <code>??</code>.</strong>
+          <code>$value = $_GET["key"] ?? "default"</code> is the null-coalescing operator. It
+          checks if the left side is set and not null &mdash; much cleaner than nested
+          <code>isset()</code> calls.
+        </li>
+        <li>
+          <strong>Headers already sent.</strong> Once PHP emits any output (even a blank line
+          before <code>&lt;?php</code>), you can&rsquo;t send HTTP headers or start a session.
+          Keep your PHP files pure &mdash; no trailing whitespace outside tags.
+        </li>
+      </ol>
+    </div>
+
+    <!-- Section: Quick reference table -->
+    <div class="section" id="diff">
+      <h2>Quick reference</h2>
+
+      <div class="diff-table" role="region" aria-label="Side-by-side reference" tabindex="0">
+        <table>
+          <thead>
+            <tr>
+              <th>What you want</th>
+              <th>PHP</th>
+              <th>Java</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>String length</td><td><code>strlen($s)</code></td><td><code>s.length()</code></td></tr>
+            <tr><td>Array / list length</td><td><code>count($a)</code></td><td><code>a.length</code> or <code>list.size()</code></td></tr>
+            <tr><td>Check if array key exists</td><td><code>array_key_exists($k, $a)</code></td><td><code>map.containsKey(k)</code></td></tr>
+            <tr><td>Check if value in array</td><td><code>in_array($v, $a)</code></td><td><code>list.contains(v)</code></td></tr>
+            <tr><td>Merge arrays</td><td><code>array_merge($a, $b)</code></td><td><code>Stream.concat(a, b).toList()</code></td></tr>
+            <tr><td>Sort array</td><td><code>sort($a)</code></td><td><code>Arrays.sort(a)</code> or <code>list.sort()</code></td></tr>
+            <tr><td>Object to string</td><td><code>__toString()</code></td><td><code>toString()</code></td></tr>
+            <tr><td>Check class of object</td><td><code>$obj instanceof Foo</code></td><td><code>obj instanceof Foo</code></td></tr>
+            <tr><td>Read file to string</td><td><code>file_get_contents($path)</code></td><td><code>Files.readString(path)</code></td></tr>
+            <tr><td>Write string to file</td><td><code>file_put_contents($path, $s)</code></td><td><code>Files.writeString(path, s)</code></td></tr>
+            <tr><td>JSON encode</td><td><code>json_encode($data)</code></td><td><code>new ObjectMapper().writeValueAsString(o)</code></td></tr>
+            <tr><td>JSON decode</td><td><code>json_decode($json, true)</code></td><td><code>new ObjectMapper().readValue(json, Map.class)</code></td></tr>
+            <tr><td>Random integer</td><td><code>random_int(0, 99)</code></td><td><code>ThreadLocalRandom.current().nextInt(100)</code></td></tr>
+            <tr><td>Ternary</td><td><code>$x ? $a : $b</code></td><td><code>x ? a : b</code></td></tr>
+            <tr><td>Null coalesce</td><td><code>$x ?? "default"</code></td><td><code>Objects.requireNonNullElse(x, "default")</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <footer>
+      PHP 8.4 &middot; Java 21 &middot; Built as a quick-start reference, not a full manual.
+    </footer>
+
+  </main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+
+</body>
+</html>
