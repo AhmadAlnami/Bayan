@@ -23,7 +23,7 @@
 <SidebarGroup class="px-2 py-0">
     <SidebarGroupLabel>Platform</SidebarGroupLabel>
     <SidebarMenu>
-        {#each items as item (toUrl(item.href))}
+            {#each items as item (toUrl(item.href))}
             <SidebarMenuItem>
                 <SidebarMenuButton
                     asChild
@@ -34,7 +34,6 @@
                         <Link
                             {...props}
                             href={toUrl(item.href)}
-                            class={props.class}
                         >
                             {#if item.icon}
                                 <item.icon class="size-4 shrink-0" />

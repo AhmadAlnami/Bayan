@@ -39,6 +39,7 @@
 		class: className,
 		children,
 		child,
+		asChild = false,
 		variant = "default",
 		size = "default",
 		isActive = false,
@@ -52,6 +53,7 @@
 		tooltipContent?: Snippet | string;
 		tooltipContentProps?: WithoutChildrenOrChild<ComponentProps<typeof Tooltip.Content>>;
 		child?: Snippet<[{ props: Record<string, unknown> }]>;
+		asChild?: boolean;
 	} = $props();
 
 	const sidebar = useSidebar();
@@ -66,10 +68,11 @@
 	});
 </script>
 
-{#snippet Button({ props }: { props?: Record<string, unknown> })}
-	{@const mergedProps = mergeProps(buttonProps, props)}
-	{#if child}
-		{@render child({ props: mergedProps })}
+{#snippet Button({ props = {} }: { props?: Record<string, unknown> })}
+	{@const mergedProps = mergeProps(buttonProps, props || {})}
+	{@const effectiveChild = child ?? (asChild ? children : undefined)}
+	{#if effectiveChild}
+		{@render effectiveChild({ props: mergedProps })}
 	{:else}
 		<button bind:this={ref} {...mergedProps}>
 			{@render children?.()}

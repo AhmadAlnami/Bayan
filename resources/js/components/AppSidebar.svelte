@@ -3,6 +3,8 @@
     import BookOpen from 'lucide-svelte/icons/book-open';
     import FolderGit2 from 'lucide-svelte/icons/folder-git-2';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
+    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
+    import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
@@ -29,9 +31,19 @@
 
     const mainNavItems: NavItem[] = [
         {
-            title: 'Dashboard',
+            title: 'لوحة التحكم',
             href: dashboard(),
             icon: LayoutGrid,
+        },
+        {
+            title: 'المصروفات',
+            href: '/transactions/expenses',
+            icon: ArrowUpRight,
+        },
+        {
+            title: 'الدخل',
+            href: '/transactions/income',
+            icon: ArrowDownLeft,
         },
     ];
 
@@ -58,7 +70,6 @@
                         <Link
                             {...props}
                             href={toUrl(dashboard())}
-                            class={props.class}
                         >
                             <AppLogo />
                         </Link>

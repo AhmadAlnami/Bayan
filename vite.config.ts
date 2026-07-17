@@ -13,6 +13,11 @@ if (isSvelteCheck) {
 }
 
 export default defineConfig({
+    resolve: {
+        alias: {
+            '@lucide/svelte': 'lucide-svelte',
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.ts'],

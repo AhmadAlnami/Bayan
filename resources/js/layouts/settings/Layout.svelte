@@ -30,6 +30,10 @@
             title: 'Appearance',
             href: editAppearance(),
         },
+        {
+            title: 'الراتب',
+            href: '/settings/salary',
+        },
     ];
 
     const url = currentUrlState();
@@ -59,7 +63,10 @@
                         asChild
                     >
                         {#snippet children(props)}
-                            <Link href={toUrl(item.href)} class={props.class}>
+                            <Link
+                                {...(props || {})}
+                                href={toUrl(item.href)}
+                            >
                                 {item.title}
                             </Link>
                         {/snippet}
