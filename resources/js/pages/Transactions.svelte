@@ -1,6 +1,6 @@
 <script module lang="ts">
     export const layout = {
-        breadcrumbs: [{ title: 'Dashboard', href: '/dashboard' }],
+        breadcrumbs: [{ title: 'لوحة التحكم', href: '/dashboard' }],
     };
 </script>
 
@@ -70,23 +70,23 @@
 
 <AppHead title={type === 'expense' ? 'المصروفات' : 'الدخل'} />
 
-<div class="flex h-full flex-col gap-6 p-4 md:p-6">
+<div class="flex h-full flex-col gap-6 p-4 md:p-6" dir="rtl">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">{type === 'expense' ? 'المصروفات' : 'الدخل'}</h1>
+        <h1 class="text-2xl font-semibold text-ink dark:text-on-dark">{type === 'expense' ? 'المصروفات' : 'الدخل'}</h1>
         <div class="flex gap-1">
-            <a href="/transactions/expenses" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'expense' ? 'bg-red-500 text-white' : 'bg-muted text-muted-foreground'}">مصروفات</a>
-            <a href="/transactions/income" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'income' ? 'bg-emerald-500 text-white' : 'bg-muted text-muted-foreground'}">دخل</a>
+            <a href="/transactions/expenses" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'expense' ? 'bg-destructive text-white' : 'bg-muted text-muted-foreground'}">مصروفات</a>
+            <a href="/transactions/income" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'income' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted text-muted-foreground'}">دخل</a>
         </div>
     </div>
 
     <form onsubmit={(e) => { e.preventDefault(); quickAdd(); }} class="flex gap-2">
         <Input placeholder={type === 'expense' ? 'إضافة سريعة... 45 ريال قهوة' : 'إضافة سريعة... 5000 راتب'} bind:value={quickText} class="flex-1" />
-        <Button type="submit" size="icon" disabled={quickLoading || !quickText.trim()}>
+        <Button type="submit" size="icon" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={quickLoading || !quickText.trim()}>
             {#if quickLoading}<Spinner class="size-4" />{:else}<Send class="size-4" />{/if}
         </Button>
         <Dialog open={showModal}>
             <DialogTrigger asChild>
-                <Button onclick={openAddModal} variant="outline" size="icon"><Plus class="size-4" /></Button>
+                <Button onclick={openAddModal} variant="outline" size="icon" class="rounded-full"><Plus class="size-4" /></Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader><DialogTitle>{editingId ? 'تعديل' : (type === 'expense' ? 'إضافة مصروف' : 'إضافة دخل')}</DialogTitle></DialogHeader>
@@ -103,7 +103,7 @@
                     </div>
                     <DialogFooter>
                         <Button variant="outline" type="button" onclick={() => showModal = false}>إلغاء</Button>
-                        <Button type="submit" disabled={loading}>{#if loading}<Spinner class="mr-2" />{/if}{editingId ? 'حفظ' : 'إضافة'}</Button>
+                        <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={loading}>{#if loading}<Spinner class="mr-2" />{/if}{editingId ? 'حفظ' : 'إضافة'}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -111,13 +111,13 @@
     </form>
 
     {#if transactions.length > 0}
-        <div class="rounded-xl border bg-card">
-            <div class="flex items-center justify-between border-b p-4">
-                <h3 class="font-semibold">آخر المعاملات</h3>
+        <div class="rounded-xl border border-hairline bg-card dark:bg-card">
+            <div class="flex items-center justify-between border-b border-hairline p-4">
+                <h3 class="font-semibold text-ink dark:text-on-dark">آخر المعاملات</h3>
             </div>
-            <div class="p-4 space-y-2">
+            <div class="space-y-2 p-4">
                 {#each transactions as tx}
-                    <div class="flex items-center gap-3 rounded-lg p-2 hover:bg-accent/50">
+                    <div class="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50">
                         <div class="flex h-8 w-8 items-center justify-center rounded-full" style="background-color: {tx.category?.color || '#6b7280'}20">
                             {#if tx.type === 'expense'}
                                 <ArrowUpRight class="size-4" style="color: {tx.category?.color || '#6b7280'}" />
@@ -125,21 +125,21 @@
                                 <ArrowDownLeft class="size-4" style="color: {tx.category?.color || '#6b7280'}" />
                             {/if}
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium truncate">{tx.description}</p>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-medium text-ink dark:text-on-dark">{tx.description}</p>
                             <p class="text-xs text-muted-foreground">{tx.category?.name || 'بدون تصنيف'}</p>
                         </div>
-                        <p class="text-sm font-semibold {tx.type === 'expense' ? 'text-red-600' : 'text-green-600'}">
+                        <p class="text-sm font-semibold {tx.type === 'expense' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
                             {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
                         </p>
                         <Button variant="ghost" size="icon" class="size-7" onclick={() => openEditModal(tx)}><Pencil class="size-3" /></Button>
-                        <Button variant="ghost" size="icon" class="size-7" onclick={() => del(tx)}><Trash2 class="size-3 text-red-500" /></Button>
+                        <Button variant="ghost" size="icon" class="size-7" onclick={() => del(tx)}><Trash2 class="size-3 text-destructive" /></Button>
                     </div>
                 {/each}
             </div>
         </div>
     {:else}
-        <div class="rounded-xl border border-dashed p-12 text-center">
+        <div class="rounded-xl border border-dashed border-hairline p-12 text-center">
             <p class="text-muted-foreground">لا توجد معاملات. أضف من الحقل أعلاه</p>
         </div>
     {/if}

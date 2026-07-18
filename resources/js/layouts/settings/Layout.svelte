@@ -19,15 +19,15 @@
 
     const sidebarNavItems: NavItem[] = [
         {
-            title: 'Profile',
+            title: 'الملف الشخصي',
             href: editProfile(),
         },
         {
-            title: 'Security',
+            title: 'الأمان',
             href: editSecurity(),
         },
         {
-            title: 'Appearance',
+            title: 'المظهر',
             href: editAppearance(),
         },
         {
@@ -39,26 +39,26 @@
     const url = currentUrlState();
 </script>
 
-<div class="px-4 py-6">
+<div class="px-4 py-6" dir="rtl">
     <Heading
-        title="Settings"
-        description="Manage your profile and account settings"
+        title="الإعدادات"
+        description="إدارة إعدادات ملفك الشخصي وحسابك"
     />
 
-    <div class="flex flex-col lg:flex-row lg:space-x-12">
+    <div class="flex flex-col lg:flex-row lg:space-x-12 lg:space-x-reverse">
         <aside class="w-full max-w-xl lg:w-48">
             <nav
-                class="flex flex-col space-y-1 space-x-0"
-                aria-label="Settings"
+                class="flex flex-col space-y-1"
+                aria-label="الإعدادات"
             >
                 {#each sidebarNavItems as item (toUrl(item.href))}
                     <Button
                         variant="ghost"
-                        class="w-full justify-start {url.isCurrentUrl(
+                        class="w-full justify-start rounded-full {url.isCurrentUrl(
                             item.href,
                             url.currentUrl,
                         )
-                            ? 'bg-muted'
+                            ? 'bg-brand-green-soft text-brand-green-dark dark:bg-brand-green/10 dark:text-brand-green'
                             : ''}"
                         asChild
                     >

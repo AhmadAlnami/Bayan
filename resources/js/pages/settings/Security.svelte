@@ -4,7 +4,7 @@
     export const layout = {
         breadcrumbs: [
             {
-                title: 'Security settings',
+                title: 'إعدادات الأمان',
                 href: edit(),
             },
         ],
@@ -38,15 +38,15 @@
     let { passwordRules }: { passwordRules: string } = $props();
 </script>
 
-<AppHead title="Security settings" />
+<AppHead title="إعدادات الأمان" />
 
-<h1 class="sr-only">Security settings</h1>
+<h1 class="sr-only">إعدادات الأمان</h1>
 
 <div class="space-y-6">
     <Heading
         variant="small"
-        title="Update password"
-        description="Ensure your account is using a long, random password to stay secure"
+        title="تحديث كلمة المرور"
+        description="تأكد أن حسابك يستخدم كلمة مرور قوية وآمنة"
     />
 
     <Form
@@ -58,38 +58,38 @@
     >
         {#snippet children({ errors, processing })}
             <div class="grid gap-2">
-                <Label for="current_password">Current password</Label>
+                <Label for="current_password">كلمة المرور الحالية</Label>
                 <PasswordInput
                     id="current_password"
                     name="current_password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
-                    placeholder="Current password"
+                    placeholder="كلمة المرور الحالية"
                 />
                 <InputError message={errors.current_password} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">New password</Label>
+                <Label for="password">كلمة المرور الجديدة</Label>
                 <PasswordInput
                     id="password"
                     name="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    placeholder="New password"
+                    placeholder="كلمة المرور الجديدة"
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
+                <Label for="password_confirmation">تأكيد كلمة المرور</Label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    placeholder="Confirm password"
+                    placeholder="تأكيد كلمة المرور"
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password_confirmation} />
@@ -98,10 +98,11 @@
             <div class="flex items-center gap-4">
                 <Button
                     type="submit"
+                    class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90"
                     disabled={processing}
                     data-test="update-password-button"
                 >
-                    Save
+                    حفظ
                 </Button>
             </div>
         {/snippet}

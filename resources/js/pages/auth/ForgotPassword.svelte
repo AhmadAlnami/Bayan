@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
-        title: 'Forgot password',
-        description: 'Enter your email to receive a password reset link',
+        title: 'نسيت كلمة المرور',
+        description: 'أدخل بريدك الإلكتروني لإرسال رابط إعادة تعيين كلمة المرور',
     };
 </script>
 
@@ -24,10 +24,10 @@
     } = $props();
 </script>
 
-<AppHead title="Forgot password" />
+<AppHead title="نسيت كلمة المرور" />
 
 {#if status}
-    <div class="mb-4 text-center text-sm font-medium text-green-600">
+    <div class="mb-4 text-center text-sm font-medium text-brand-green-dark dark:text-brand-green">
         {status}
     </div>
 {/if}
@@ -36,7 +36,7 @@
     <Form {...email.form()}>
         {#snippet children({ errors, processing })}
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label for="email">البريد الإلكتروني</Label>
                 <Input
                     id="email"
                     type="email"
@@ -50,19 +50,19 @@
             <div class="my-6 flex items-center justify-start">
                 <Button
                     type="submit"
-                    class="w-full"
+                    class="w-full rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90"
                     disabled={processing}
                     data-test="email-password-reset-link-button"
                 >
                     {#if processing}<Spinner />{/if}
-                    Email password reset link
+                    إرسال رابط إعادة التعيين
                 </Button>
             </div>
         {/snippet}
     </Form>
 
-    <div class="space-x-1 text-center text-sm text-muted-foreground">
-        <span>Or, return to</span>
-        <TextLink href={login()}>log in</TextLink>
+    <div class="text-center text-sm text-muted-foreground">
+        أو
+        <TextLink href={login()}>ارجع لتسجيل الدخول</TextLink>
     </div>
 </div>

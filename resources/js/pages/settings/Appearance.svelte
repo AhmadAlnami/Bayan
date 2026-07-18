@@ -4,7 +4,7 @@
     export const layout = {
         breadcrumbs: [
             {
-                title: 'Appearance settings',
+                title: 'إعدادات المظهر',
                 href: editAppearance(),
             },
         ],
@@ -17,15 +17,15 @@
     import Heading from '@/components/Heading.svelte';
 </script>
 
-<AppHead title="Appearance settings" />
+<AppHead title="إعدادات المظهر" />
 
-<h1 class="sr-only">Appearance settings</h1>
+<h1 class="sr-only">إعدادات المظهر</h1>
 
 <div class="space-y-6">
     <Heading
         variant="small"
-        title="Appearance settings"
-        description="Update the appearance settings for your account"
+        title="إعدادات المظهر"
+        description="غيّر مظهر التطبيق (فاتح أو داكن)"
     />
     <AppearanceTabs />
 </div>

@@ -4,7 +4,7 @@
     export const layout = {
         breadcrumbs: [
             {
-                title: 'Profile settings',
+                title: 'إعدادات الملف الشخصي',
                 href: edit(),
             },
         ],
@@ -27,15 +27,15 @@
     const user = $derived(page.props.auth.user);
 </script>
 
-<AppHead title="Profile settings" />
+<AppHead title="إعدادات الملف الشخصي" />
 
-<h1 class="sr-only">Profile settings</h1>
+<h1 class="sr-only">إعدادات الملف الشخصي</h1>
 
 <div class="flex flex-col space-y-6">
     <Heading
         variant="small"
-        title="Profile"
-        description="Update your name and email address"
+        title="الملف الشخصي"
+        description="حدّث اسمك وبريدك الإلكتروني"
     />
 
     <Form
@@ -45,7 +45,7 @@
     >
         {#snippet children({ errors, processing })}
             <div class="grid gap-2">
-                <Label for="name">Name</Label>
+                <Label for="name">الاسم</Label>
                 <Input
                     id="name"
                     name="name"
@@ -53,13 +53,13 @@
                     value={user.name}
                     required
                     autocomplete="name"
-                    placeholder="Full name"
+                    placeholder="الاسم الكامل"
                 />
                 <InputError class="mt-2" message={errors.name} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="email">Email address</Label>
+                <Label for="email">البريد الإلكتروني</Label>
                 <Input
                     id="email"
                     type="email"
@@ -68,7 +68,7 @@
                     value={user.email}
                     required
                     autocomplete="username"
-                    placeholder="Email address"
+                    placeholder="email@example.com"
                 />
                 <InputError class="mt-2" message={errors.email} />
             </div>
@@ -76,16 +76,15 @@
             {#if Boolean(page.props.mustVerifyEmail) && !user.email_verified_at}
                 <div>
                     <p class="-mt-4 text-sm text-muted-foreground">
-                        Your email address is unverified.
+                        بريدك الإلكتروني غير مؤكد.
                         <TextLink href={send()} as="button">
-                            Click here to re-send the verification email.
+                            اضغط هنا لإعادة إرسال بريد التأكيد.
                         </TextLink>
                     </p>
 
                     {#if page.props.status === 'verification-link-sent'}
-                        <div class="mt-2 text-sm font-medium text-green-600">
-                            A new verification link has been sent to your email
-                            address.
+                        <div class="mt-2 text-sm font-medium text-brand-green-dark dark:text-brand-green">
+                            تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني.
                         </div>
                     {/if}
                 </div>
@@ -94,8 +93,9 @@
             <div class="flex items-center gap-4">
                 <Button
                     type="submit"
+                    class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90"
                     disabled={processing}
-                    data-test="update-profile-button">Save</Button
+                    data-test="update-profile-button">حفظ</Button
                 >
             </div>
         {/snippet}

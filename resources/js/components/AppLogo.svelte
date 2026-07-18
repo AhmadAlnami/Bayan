@@ -1,14 +1,12 @@
 <script lang="ts">
-    import AppLogoIcon from '@/components/AppLogoIcon.svelte';
+    import Wallet from 'lucide-svelte/icons/wallet';
 </script>
 
 <div
-    class="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground"
+    class="flex aspect-square size-9 items-center justify-center rounded-xl bg-brand-green"
 >
-    <AppLogoIcon class="size-5 fill-current text-white dark:text-black" />
+    <Wallet class="size-5 text-brand-teal-deep" />
 </div>
-<div class="ml-1 grid flex-1 text-left text-sm">
-    <span class="mb-0.5 truncate leading-tight font-semibold"
-        >Laravel Starter Kit</span
-    >
+<div class="mr-1 grid flex-1 text-left text-sm">
+    <span class="mb-0.5 truncate leading-tight font-semibold text-ink dark:text-on-dark">بيان</span>
 </div>

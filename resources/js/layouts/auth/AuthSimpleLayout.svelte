@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
     import type { Snippet } from 'svelte';
-    import AppLogoIcon from '@/components/AppLogoIcon.svelte';
+    import Wallet from 'lucide-svelte/icons/wallet';
     import { home } from '@/routes';
 
     let {
@@ -17,6 +17,7 @@
 
 <div
     class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
+    dir="rtl"
 >
     <div class="w-full max-w-sm">
         <div class="flex flex-col gap-8">
@@ -26,16 +27,14 @@
                     class="flex flex-col items-center gap-2 font-medium"
                 >
                     <div
-                        class="mb-1 flex h-9 w-9 items-center justify-center rounded-md"
+                        class="mb-1 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green"
                     >
-                        <AppLogoIcon
-                            class="size-9 fill-current text-(--foreground) dark:text-white"
-                        />
+                        <Wallet class="size-6 text-brand-teal-deep" />
                     </div>
-                    <span class="sr-only">{title}</span>
+                    <span class="text-lg font-semibold text-ink dark:text-on-dark">بيان</span>
                 </Link>
                 <div class="space-y-2 text-center">
-                    <h1 class="text-xl font-medium">{title}</h1>
+                    <h1 class="text-xl font-medium text-ink dark:text-on-dark">{title}</h1>
                     <p class="text-center text-sm text-muted-foreground">
                         {description}
                     </p>
