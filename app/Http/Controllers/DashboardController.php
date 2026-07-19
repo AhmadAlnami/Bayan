@@ -103,6 +103,85 @@ class DashboardController extends Controller
             ];
         }
 
+        $insights = (new InsightsService)->calculate($user);
+
+        $budgets = $user->budgets()
+            ->with('category')
+            ->get()
+            ->map(function ($b) use ($user) {
+                return $this->formatBudgetWithProgress($b, $user);
+            })->values();
+
+        $budgetWarnings = [];
+        foreach ($budgets as $b) {
+            if ($b['spent'] > $b['amount'] && $b['amount'] > 0) {
+                $locale = app()->getLocale();
+                $typeLabel = match ($b['type']) {
+                    'daily' => $locale === 'en' ? 'Daily' : 'اليومية',
+                    'weekly' => $locale === 'en' ? 'Weekly' : 'الأسبوعية',
+                    'monthly' => $locale === 'en' ? 'Monthly' : 'الشهرية',
+                    'category' => $locale === 'en' ? ($b['category']['name_en'] ?? 'Category') : ($b['category']['name'] ?? 'تصنيف'),
+                    default => '',
+                };
+                $budgetWarnings[] = [
+                    'type' => $b['type'],
+                    'type_label' => $typeLabel,
+                    'spent' => $b['spent'],
+                    'amount' => $b['amount'],
+                    'progress' => $b['progress'],
+                ];
+            }
+        }
+
+        $today = now()->format('Y-m-d');
+        $todayExpenses = $user->transactions()
+            ->where('type', 'expense')
+            ->whereDate('transaction_date', $today)
+            ->sum('amount');
+        $todayCount = $user->transactions()
+            ->where('type', 'expense')
+            ->whereDate('transaction_date', $today)
+            ->count();
+
+        $weekExpenses = $user->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [
+                now()->startOfWeek()->format('Y-m-d').' 00:00:00',
+                now()->endOfWeek()->format('Y-m-d').' 23:59:59',
+            ])
+            ->sum('amount');
+        $weekCount = $user->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [
+                now()->startOfWeek()->format('Y-m-d').' 00:00:00',
+                now()->endOfWeek()->format('Y-m-d').' 23:59:59',
+            ])
+            ->count();
+
+        $daysPassed = max(1, (int) now()->day);
+        $avgDailyThisMonth = (float) round($thisMonthExpenses / $daysPassed, 2);
+
+        $lastMonthStart = now()->subMonth()->startOfMonth();
+        $lastMonthEnd = now()->subMonth()->endOfMonth();
+        $lastMonthDays = max(1, (int) now()->subMonth()->daysInMonth);
+        $lastMonthExpenses = $user->transactions()
+            ->where('type', 'expense')
+            ->whereBetween('transaction_date', [$lastMonthStart->format('Y-m-d'), $lastMonthEnd->format('Y-m-d')])
+            ->sum('amount');
+        $lastMonthAvgDaily = $lastMonthExpenses > 0 ? round($lastMonthExpenses / $lastMonthDays, 2) : 0;
+
+        $trendPct = $lastMonthAvgDaily > 0 ? round((($avgDailyThisMonth - $lastMonthAvgDaily) / $lastMonthAvgDaily) * 100) : 0;
+
+        $summary = [
+            'today_expenses' => (float) $todayExpenses,
+            'today_count' => $todayCount,
+            'week_expenses' => (float) $weekExpenses,
+            'week_count' => $weekCount,
+            'avg_daily_this_month' => $avgDailyThisMonth,
+            'trend_label' => $trendPct > 0 ? 'up' : ($trendPct < 0 ? 'down' : 'same'),
+            'trend_pct' => abs($trendPct),
+        ];
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'total_expenses' => $user->transactions()->where('type', 'expense')->sum('amount'),
@@ -116,13 +195,10 @@ class DashboardController extends Controller
             'monthlyChart' => $monthlyChart,
             'dailyChart' => $dailyChart,
             'recentTransactions' => $recentTransactions->values(),
-            'insights' => (new InsightsService)->calculate($user),
-            'budgets' => $user->budgets()
-                ->with('category')
-                ->get()
-                ->map(function ($b) use ($user) {
-                    return $this->formatBudgetWithProgress($b, $user);
-                })->values(),
+            'insights' => $insights,
+            'budgets' => $budgets,
+            'budget_warnings' => $budgetWarnings,
+            'summary' => $summary,
         ]);
     }
 
@@ -153,28 +229,28 @@ class DashboardController extends Controller
 
         switch ($budget->type) {
             case 'daily':
-                $query->where('transaction_date', now());
+                $query->whereDate('transaction_date', now());
                 break;
 
             case 'weekly':
                 $query->whereBetween('transaction_date', [
-                    now()->startOfWeek()->format('Y-m-d'),
-                    now()->endOfWeek()->format('Y-m-d'),
+                    now()->startOfWeek(),
+                    now()->endOfWeek(),
                 ]);
                 break;
 
             case 'monthly':
                 $query->whereBetween('transaction_date', [
-                    now()->startOfMonth()->format('Y-m-d'),
-                    now()->endOfMonth()->format('Y-m-d'),
+                    now()->startOfMonth(),
+                    now()->endOfMonth(),
                 ]);
                 break;
 
             case 'category':
                 $query->where('category_id', $budget->category_id)
                     ->whereBetween('transaction_date', [
-                        now()->startOfMonth()->format('Y-m-d'),
-                        now()->endOfMonth()->format('Y-m-d'),
+                        now()->startOfMonth(),
+                        now()->endOfMonth(),
                     ]);
                 break;
         }

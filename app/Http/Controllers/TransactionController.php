@@ -92,13 +92,26 @@ class TransactionController extends Controller
         ]);
 
         $locale = app()->getLocale();
+        $category = Category::find($categoryId);
         $categoryName = $locale === 'en'
-            ? (Category::find($categoryId)?->name_en ?? '')
-            : (Category::find($categoryId)?->name ?? '');
+            ? ($category?->name_en ?? '')
+            : ($category?->name ?? '');
 
         $message = $locale === 'en'
             ? 'Added: '.$description.($categoryName ? ' - '.$categoryName : '')
             : 'تمت الإضافة: '.$description.($categoryName ? ' - '.$categoryName : '');
+
+        if ($request->type === 'expense') {
+            $budgetWarning = $this->checkBudgetExceeded($request->user());
+            if ($budgetWarning) {
+                $message .= ' ⚠️ '.$budgetWarning;
+            }
+
+            $anomalyWarning = $this->checkAnomaly($request->user(), $categoryId, $amount, $locale);
+            if ($anomalyWarning) {
+                $message .= ' '.$anomalyWarning;
+            }
+        }
 
         return Redirect::back()->with('toast', ['type' => 'success', 'message' => $message]);
     }
@@ -127,6 +140,18 @@ class TransactionController extends Controller
             ? 'Added: '.$validated['description'].($categoryName ? ' - '.$categoryName : '')
             : 'تمت الإضافة: '.$validated['description'].($categoryName ? ' - '.$categoryName : '');
 
+        if ($validated['type'] === 'expense') {
+            $budgetWarning = $this->checkBudgetExceeded($request->user());
+            if ($budgetWarning) {
+                $message .= ' ⚠️ '.$budgetWarning;
+            }
+
+            $anomalyWarning = $this->checkAnomaly($request->user(), $validated['category_id'], $validated['amount'], $locale);
+            if ($anomalyWarning) {
+                $message .= ' '.$anomalyWarning;
+            }
+        }
+
         return Redirect::back()->with('toast', ['type' => 'success', 'message' => $message]);
     }
 
@@ -144,6 +169,74 @@ class TransactionController extends Controller
         $message = app()->getLocale() === 'en' ? 'Updated.' : 'تم التعديل';
 
         return Redirect::back()->with('toast', ['type' => 'success', 'message' => $message]);
+    }
+
+    private function checkBudgetExceeded($user): ?string
+    {
+        $budgets = $user->budgets()->get();
+        if ($budgets->isEmpty()) {
+            return null;
+        }
+
+        $locale = app()->getLocale();
+
+        foreach ($budgets as $budget) {
+            $spent = match ($budget->type) {
+                'daily' => $user->transactions()->where('type', 'expense')->whereDate('transaction_date', Carbon::today())->sum('amount'),
+                'weekly' => $user->transactions()->where('type', 'expense')->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])->sum('amount'),
+                'monthly' => $user->transactions()->where('type', 'expense')->whereBetween('transaction_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->sum('amount'),
+                'category' => $user->transactions()->where('type', 'expense')->where('category_id', $budget->category_id)->whereBetween('transaction_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()])->sum('amount'),
+                default => 0,
+            };
+
+            if ($spent > $budget->amount) {
+                $typeName = match ($budget->type) {
+                    'daily' => $locale === 'en' ? 'daily' : 'اليومية',
+                    'weekly' => $locale === 'en' ? 'weekly' : 'الأسبوعية',
+                    'monthly' => $locale === 'en' ? 'monthly' : 'الشهرية',
+                    'category' => $locale === 'en' ? ($budget->category?->name_en ?? 'category') : ($budget->category?->name ?? 'التصنيف'),
+                    default => '',
+                };
+
+                return $locale === 'en'
+                    ? "Over {$typeName} budget!"
+                    : "تجاوزت الميزانية {$typeName}!";
+            }
+        }
+
+        return null;
+    }
+
+    private function checkAnomaly($user, $categoryId, float $amount, string $locale): ?string
+    {
+        if (! $categoryId || $amount <= 0) {
+            return null;
+        }
+
+        $thirtyDaysAgo = Carbon::now()->subDays(30)->format('Y-m-d');
+        $avg = $user->transactions()
+            ->where('type', 'expense')
+            ->where('category_id', $categoryId)
+            ->where('transaction_date', '>=', $thirtyDaysAgo)
+            ->avg('amount');
+
+        if (! $avg || $avg <= 0) {
+            return null;
+        }
+
+        if ($amount > ($avg * 3) && $amount > 100) {
+            $category = Category::find($categoryId);
+            $categoryName = $locale === 'en'
+                ? ($category?->name_en ?? 'this category')
+                : ($category?->name ?? 'هذا التصنيف');
+            $formattedAvg = number_format((float) $avg, $amount >= 1000 ? 0 : 2);
+
+            return $locale === 'en'
+                ? '⚠️ This amount is unusual! You usually spend '.$formattedAvg.' on '.$categoryName
+                : '⚠️ هذا المبلغ غير معتاد! عادة تصرف '.$formattedAvg.' على '.$categoryName;
+        }
+
+        return null;
     }
 
     public function destroy(Request $request, Transaction $transaction): RedirectResponse

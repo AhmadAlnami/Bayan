@@ -19,6 +19,8 @@
     import TrendingDown from 'lucide-svelte/icons/trending-down';
     import TrendingUp from 'lucide-svelte/icons/trending-up';
     import Calendar from 'lucide-svelte/icons/calendar';
+    import AlertTriangle from 'lucide-svelte/icons/alert-triangle';
+    import FileText from 'lucide-svelte/icons/file-text';
     import PieChart from '@/components/charts/PieChart.svelte';
     import BarChart from '@/components/charts/BarChart.svelte';
     import LineChart from '@/components/charts/LineChart.svelte';
@@ -35,6 +37,8 @@
         recentTransactions = [] as any[],
         insights = null as any,
         budgets = [] as any[],
+        budget_warnings = [] as { type: string; type_label: string; spent: number; amount: number; progress: number }[],
+        summary = null as { today_expenses: number; today_count: number; week_expenses: number; week_count: number; avg_daily_this_month: number; trend_label: string; trend_pct: number } | null,
     } = $props();
 
     let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
@@ -189,6 +193,29 @@
         </div>
     {/if}
 
+    {#if budget_warnings.length > 0}
+        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {#each budget_warnings as w}
+                <div class="flex items-start gap-3 rounded-xl border border-hairline bg-destructive/5 p-3 sm:p-4 dark:bg-destructive/10 animate-fade-in-up">
+                    <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-destructive/10">
+                        <AlertTriangle class="size-4 text-destructive" />
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-destructive">
+                            {t('dashboard.budget_warning')}: {w.type_label}
+                        </p>
+                        <p class="text-xs text-muted-foreground">
+                            {formatAmount(w.spent)} / {formatAmount(w.amount)}
+                        </p>
+                        <div class="mt-1.5 h-1.5 w-full rounded-full bg-muted">
+                            <div class="h-1.5 rounded-full bg-destructive" style="width: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            {/each}
+        </div>
+    {/if}
+
     {#if budgets.length > 0}
         <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-6">
             <div class="mb-3 flex items-center gap-2 sm:mb-4">
@@ -215,6 +242,57 @@
                         </div>
                     </div>
                 {/each}
+            </div>
+        </div>
+    {/if}
+
+    {#if summary}
+        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-6 dark:bg-card animate-fade-in-up">
+            <div class="mb-3 flex items-center gap-2 sm:mb-4">
+                <FileText class="size-4 text-accent-blue" />
+                <h3 class="text-sm font-semibold sm:text-base">{t('dashboard.summary_title')}</h3>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="rounded-lg border border-hairline p-3">
+                    <div class="flex items-center gap-2 mb-1">
+                        <Calendar class="size-3.5 text-muted-foreground" />
+                        <span class="text-xs text-muted-foreground">{t('dashboard.summary_today')}</span>
+                    </div>
+                    <p class="text-lg font-bold">{formatAmount(summary.today_expenses)}</p>
+                    <p class="text-[10px] text-muted-foreground">{t('dashboard.summary_transactions')}: {summary.today_count}</p>
+                </div>
+                <div class="rounded-lg border border-hairline p-3">
+                    <div class="flex items-center gap-2 mb-1">
+                        <Calendar class="size-3.5 text-muted-foreground" />
+                        <span class="text-xs text-muted-foreground">{t('dashboard.summary_week')}</span>
+                    </div>
+                    <p class="text-lg font-bold">{formatAmount(summary.week_expenses)}</p>
+                    <p class="text-[10px] text-muted-foreground">{t('dashboard.summary_transactions')}: {summary.week_count}</p>
+                </div>
+                <div class="rounded-lg border border-hairline p-3">
+                    <div class="flex items-center gap-2 mb-1">
+                        <TrendingUp class="size-3.5 text-muted-foreground" />
+                        <span class="text-xs text-muted-foreground">{t('dashboard.summary_avg_daily')}</span>
+                    </div>
+                    <p class="text-lg font-bold">{formatAmount(summary.avg_daily_this_month)}</p>
+                    <p class="text-[10px] text-muted-foreground">{t('dashboard.summary_this_month')}</p>
+                </div>
+                <div class="rounded-lg border border-hairline p-3">
+                    <div class="flex items-center gap-2 mb-1">
+                        {#if summary.trend_label === 'up'}
+                            <TrendingUp class="size-3.5 text-destructive" />
+                        {:else if summary.trend_label === 'down'}
+                            <TrendingDown class="size-3.5 text-brand-green-dark dark:text-brand-green" />
+                        {:else}
+                            <Calendar class="size-3.5 text-muted-foreground" />
+                        {/if}
+                        <span class="text-xs text-muted-foreground">{t('dashboard.summary_trend')}</span>
+                    </div>
+                    <p class="text-lg font-bold {summary.trend_label === 'up' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
+                        {summary.trend_label === 'up' ? '+' : summary.trend_label === 'down' ? '-' : ''}{summary.trend_pct}%
+                    </p>
+                    <p class="text-[10px] text-muted-foreground">{t('dashboard.summary_vs_last')}</p>
+                </div>
             </div>
         </div>
     {/if}

@@ -108,28 +108,28 @@ class BudgetController extends Controller
 
         switch ($budget->type) {
             case 'daily':
-                $query->where('transaction_date', Carbon::today());
+                $query->whereDate('transaction_date', Carbon::today());
                 break;
 
             case 'weekly':
                 $query->whereBetween('transaction_date', [
-                    Carbon::now()->startOfWeek()->format('Y-m-d'),
-                    Carbon::now()->endOfWeek()->format('Y-m-d'),
+                    Carbon::now()->startOfWeek(),
+                    Carbon::now()->endOfWeek(),
                 ]);
                 break;
 
             case 'monthly':
                 $query->whereBetween('transaction_date', [
-                    Carbon::now()->startOfMonth()->format('Y-m-d'),
-                    Carbon::now()->endOfMonth()->format('Y-m-d'),
+                    Carbon::now()->startOfMonth(),
+                    Carbon::now()->endOfMonth(),
                 ]);
                 break;
 
             case 'category':
                 $query->where('category_id', $budget->category_id)
                     ->whereBetween('transaction_date', [
-                        Carbon::now()->startOfMonth()->format('Y-m-d'),
-                        Carbon::now()->endOfMonth()->format('Y-m-d'),
+                        Carbon::now()->startOfMonth(),
+                        Carbon::now()->endOfMonth(),
                     ]);
                 break;
         }
