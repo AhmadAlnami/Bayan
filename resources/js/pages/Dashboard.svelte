@@ -15,6 +15,7 @@
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
     import Send from 'lucide-svelte/icons/send';
     import Wallet from 'lucide-svelte/icons/wallet';
+    import Target from 'lucide-svelte/icons/target';
     import TrendingDown from 'lucide-svelte/icons/trending-down';
     import TrendingUp from 'lucide-svelte/icons/trending-up';
     import Calendar from 'lucide-svelte/icons/calendar';
@@ -33,6 +34,7 @@
         dailyChart = [] as { day: string; total: number }[],
         recentTransactions = [] as any[],
         insights = null as any,
+        budgets = [] as any[],
     } = $props();
 
     let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
@@ -183,6 +185,36 @@
                 <p class="text-xs text-muted-foreground">{t('insights.savingsRate')}</p>
                 <p class="text-lg font-bold text-brand-green-dark dark:text-brand-green">{insights.savingsRate.rate}%</p>
                 <p class="text-[10px] text-muted-foreground">{formatAmount(insights.savingsRate.saved)} {t('insights.dashboardSavings')}</p>
+            </div>
+        </div>
+    {/if}
+
+    {#if budgets.length > 0}
+        <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-6">
+            <div class="mb-3 flex items-center gap-2 sm:mb-4">
+                <Target class="size-4 text-brand-green-dark dark:text-brand-green" />
+                <h3 class="text-sm font-semibold sm:text-base">{t('budgets.title')}</h3>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {#each budgets.slice(0, 3) as b}
+                    <div class="rounded-lg border border-hairline p-3 animate-fade-in-up">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-medium text-muted-foreground">
+                                {b.type === 'daily' ? t('budgets.daily') : b.type === 'weekly' ? t('budgets.weekly') : b.type === 'monthly' ? t('budgets.monthly') : localizedName(b.category)}
+                            </span>
+                            <span class="text-xs font-semibold {b.progress >= 100 ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
+                                {b.progress}%
+                            </span>
+                        </div>
+                        <div class="h-1.5 w-full rounded-full bg-muted sm:h-2">
+                            <div class="h-1.5 rounded-full transition-all sm:h-2 {b.progress >= 100 ? 'bg-destructive' : b.progress >= 80 ? 'bg-accent-orange' : 'bg-brand-green'}" style="width: {Math.min(b.progress, 100)}%"></div>
+                        </div>
+                        <div class="mt-1 flex justify-between text-[10px] text-muted-foreground">
+                            <span>{t('budgets.spent')}: {formatAmount(b.spent || 0)}</span>
+                            <span>{formatAmount(b.amount)}</span>
+                        </div>
+                    </div>
+                {/each}
             </div>
         </div>
     {/if}

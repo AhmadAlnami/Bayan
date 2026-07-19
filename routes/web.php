@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InsightsController;
@@ -27,6 +28,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('transactions/{transaction}', [TransactionController::class, 'destroy'])->name('transactions.destroy');
 
     Route::post('categories', [CategoryController::class, 'store'])->name('categories.store');
+
+    Route::get('budgets', [BudgetController::class, 'index'])->name('budgets');
+    Route::post('budgets', [BudgetController::class, 'store'])->name('budgets.store');
+    Route::delete('budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
 });
 
 require __DIR__.'/settings.php';

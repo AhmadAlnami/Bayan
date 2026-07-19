@@ -117,6 +117,68 @@ class DashboardController extends Controller
             'dailyChart' => $dailyChart,
             'recentTransactions' => $recentTransactions->values(),
             'insights' => (new InsightsService)->calculate($user),
+            'budgets' => $user->budgets()
+                ->with('category')
+                ->get()
+                ->map(function ($b) use ($user) {
+                    return $this->formatBudgetWithProgress($b, $user);
+                })->values(),
         ]);
+    }
+
+    private function formatBudgetWithProgress($budget, $user): array
+    {
+        $spent = $this->calculateBudgetSpent($budget, $user);
+        $amount = (float) $budget->amount;
+        $progress = $amount > 0 ? min(round(($spent / $amount) * 100, 1), 100) : 0;
+
+        return [
+            'id' => $budget->id,
+            'type' => $budget->type,
+            'amount' => $amount,
+            'spent' => $spent,
+            'progress' => $progress,
+            'category' => $budget->category ? [
+                'id' => $budget->category->id,
+                'name' => $budget->category->name,
+                'name_en' => $budget->category->name_en,
+                'color' => $budget->category->color,
+            ] : null,
+        ];
+    }
+
+    private function calculateBudgetSpent($budget, $user): float
+    {
+        $query = $user->transactions()->where('type', 'expense');
+
+        switch ($budget->type) {
+            case 'daily':
+                $query->where('transaction_date', now());
+                break;
+
+            case 'weekly':
+                $query->whereBetween('transaction_date', [
+                    now()->startOfWeek()->format('Y-m-d'),
+                    now()->endOfWeek()->format('Y-m-d'),
+                ]);
+                break;
+
+            case 'monthly':
+                $query->whereBetween('transaction_date', [
+                    now()->startOfMonth()->format('Y-m-d'),
+                    now()->endOfMonth()->format('Y-m-d'),
+                ]);
+                break;
+
+            case 'category':
+                $query->where('category_id', $budget->category_id)
+                    ->whereBetween('transaction_date', [
+                        now()->startOfMonth()->format('Y-m-d'),
+                        now()->endOfMonth()->format('Y-m-d'),
+                    ]);
+                break;
+        }
+
+        return (float) $query->sum('amount');
     }
 }

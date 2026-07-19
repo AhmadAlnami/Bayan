@@ -2,6 +2,7 @@
     import { Link } from '@inertiajs/svelte';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
+    import Target from 'lucide-svelte/icons/target';
     import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
     import { toUrl } from '@/lib/utils';
@@ -14,6 +15,7 @@
     const tabs = [
         { title: () => t('nav.dashboard'), href: toUrl(dashboard()), icon: LayoutGrid },
         { title: () => t('insights.title'), href: '/insights', icon: BarChart3 },
+        { title: () => t('budgets.title'), href: '/budgets', icon: Target },
         { title: () => t('nav.expenses'), href: '/transactions/expenses', icon: ArrowUpRight },
         { title: () => t('nav.income'), href: '/transactions/income', icon: ArrowDownLeft },
     ];
