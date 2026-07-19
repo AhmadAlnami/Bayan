@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
         breadcrumbs: [
-            { title: 'لوحة التحكم', href: '/dashboard' },
+            { title: 'Dashboard', href: '/dashboard' },
         ],
     };
 </script>
@@ -19,6 +19,7 @@
     import TrendingDown from 'lucide-svelte/icons/trending-down';
     import TrendingUp from 'lucide-svelte/icons/trending-up';
     import Calendar from 'lucide-svelte/icons/calendar';
+    import { t, localizedName } from '@/lib/locale.svelte';
 
     let {
         stats = {
@@ -33,35 +34,34 @@
         recentTransactions = [] as any[],
     } = $props();
 
-    let chatMessages = $state([{ role: 'assistant', content: 'مرحباً! أنا مساعدك المالي. اسألني عن مصاريفك أو دعني أساعدك في تتبع ميزانيتك.' }]);
+    let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
     let chatInput = $state('');
 
     function sendChatMessage() {
         if (!chatInput.trim()) return;
         chatMessages = [...chatMessages, { role: 'user', content: chatInput }];
-        const userMsg = chatInput;
         chatInput = '';
 
         setTimeout(() => {
             chatMessages = [...chatMessages, {
                 role: 'assistant',
-                content: 'شكراً على سؤالك! ميزة المحادثة الذكية قيد التطوير حالياً. قريباً سأتمكن من الإجابة عن استفساراتك المالية.'
+                content: t('dashboard.chat_coming_soon')
             }];
         }, 1000);
     }
 
     function formatAmount(amount: number): string {
-        return new Intl.NumberFormat('ar-SA').format(amount) + ' ر.س';
+        return new Intl.NumberFormat('ar-SA').format(amount) + ' ' + t('common.sar');
     }
 </script>
 
-<AppHead title="لوحة التحكم" />
+<AppHead title={t('dashboard.title')} />
 
-<div class="flex h-full flex-col gap-6 p-4 md:p-6" dir="rtl">
+<div class="flex h-full flex-col gap-6 p-4 md:p-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-2xl font-semibold text-ink dark:text-on-dark">لوحة التحكم</h1>
-            <p class="text-sm text-muted-foreground">مرحباً بك في بيان</p>
+            <h1 class="text-2xl font-semibold">{t('dashboard.title')}</h1>
+            <p class="text-sm text-muted-foreground">{t('dashboard.welcome')}</p>
         </div>
     </div>
 
@@ -72,7 +72,7 @@
                     <TrendingDown class="size-5 text-destructive" />
                 </div>
                 <div>
-                    <p class="text-sm text-muted-foreground">مصروفات الشهر</p>
+                    <p class="text-sm text-muted-foreground">{t('dashboard.month_expenses')}</p>
                     <p class="text-xl font-bold text-destructive">{formatAmount(stats.this_month_expenses)}</p>
                 </div>
             </div>
@@ -84,7 +84,7 @@
                     <TrendingUp class="size-5 text-brand-green-dark dark:text-brand-green" />
                 </div>
                 <div>
-                    <p class="text-sm text-muted-foreground">دخل الشهر</p>
+                    <p class="text-sm text-muted-foreground">{t('dashboard.month_income')}</p>
                     <p class="text-xl font-bold text-brand-green-dark dark:text-brand-green">{formatAmount(stats.this_month_income)}</p>
                 </div>
             </div>
@@ -96,7 +96,7 @@
                     <Wallet class="size-5 text-accent-blue" />
                 </div>
                 <div>
-                    <p class="text-sm text-muted-foreground">المتبقي</p>
+                    <p class="text-sm text-muted-foreground">{t('dashboard.remaining')}</p>
                     <p class="text-xl font-bold {stats.balance >= 0 ? 'text-accent-blue' : 'text-destructive'}">{formatAmount(stats.balance)}</p>
                 </div>
             </div>
@@ -108,8 +108,8 @@
                     <Calendar class="size-5 text-accent-orange" />
                 </div>
                 <div>
-                    <p class="text-sm text-muted-foreground">عدد المعاملات</p>
-                    <p class="text-xl font-bold text-ink dark:text-on-dark">{stats.transaction_count}</p>
+                    <p class="text-sm text-muted-foreground">{t('dashboard.transactions_count')}</p>
+                    <p class="text-xl font-bold">{stats.transaction_count}</p>
                 </div>
             </div>
         </div>
@@ -117,16 +117,16 @@
 
     <div class="grid gap-6 lg:grid-cols-2">
         <div class="rounded-xl border border-hairline bg-card p-6 dark:bg-card">
-            <h3 class="mb-4 font-semibold text-ink dark:text-on-dark">التصنيفات</h3>
+            <h3 class="mb-4 font-semibold">{t('dashboard.categories')}</h3>
             {#if categoryBreakdown.length === 0}
-                <p class="text-sm text-muted-foreground">لا توجد بيانات كافية</p>
+                <p class="text-sm text-muted-foreground">{t('dashboard.no_data')}</p>
             {:else}
                 <div class="space-y-3">
                     {#each categoryBreakdown as cat}
                         <div class="flex items-center gap-3">
                             <div class="h-3 w-3 shrink-0 rounded-full" style="background-color: {cat.color}"></div>
-                            <span class="flex-1 text-sm text-ink dark:text-on-dark">{cat.name}</span>
-                            <span class="text-sm font-medium text-ink dark:text-on-dark">{formatAmount(cat.total)}</span>
+                            <span class="flex-1 text-sm">{localizedName(cat)}</span>
+                            <span class="text-sm font-medium">{formatAmount(cat.total)}</span>
                             <span class="w-10 text-right text-xs text-muted-foreground">{cat.percentage}%</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-muted">
@@ -139,13 +139,13 @@
 
         <div class="flex flex-col rounded-xl border border-hairline bg-card dark:bg-card">
             <div class="border-b border-hairline p-4">
-                <h3 class="font-semibold text-ink dark:text-on-dark">المحادثة الذكية</h3>
-                <p class="text-xs text-muted-foreground">اسألني عن مصاريفك</p>
+                <h3 class="font-semibold">{t('dashboard.chat')}</h3>
+                <p class="text-xs text-muted-foreground">{t('dashboard.chat_subtitle')}</p>
             </div>
             <div class="flex-1 space-y-3 overflow-y-auto p-4 min-h-[200px] max-h-[300px]">
                 {#each chatMessages as msg}
                     <div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
-                        <div class="max-w-[80%] rounded-xl px-4 py-2 text-sm {msg.role === 'user' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted text-ink dark:text-on-dark'}">
+                        <div class="max-w-[80%] rounded-xl px-4 py-2 text-sm {msg.role === 'user' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted'}">
                             {msg.content}
                         </div>
                     </div>
@@ -154,7 +154,7 @@
             <div class="border-t border-hairline p-3">
                 <form onsubmit={(e) => { e.preventDefault(); sendChatMessage(); }} class="flex gap-2">
                     <Input
-                        placeholder="اسأل عن مصاريفك..."
+                        placeholder={t('dashboard.chat_placeholder')}
                         class="flex-1"
                         bind:value={chatInput}
                     />
@@ -169,7 +169,7 @@
     {#if recentTransactions.length > 0}
         <div class="rounded-xl border border-hairline bg-card dark:bg-card">
             <div class="flex items-center justify-between border-b border-hairline p-4">
-                <h3 class="font-semibold text-ink dark:text-on-dark">آخر المعاملات</h3>
+                <h3 class="font-semibold">{t('dashboard.recent')}</h3>
             </div>
             <div class="space-y-2 p-4">
                 {#each recentTransactions as tx}
@@ -182,8 +182,8 @@
                             {/if}
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-medium text-ink dark:text-on-dark">{tx.description}</p>
-                            <p class="text-xs text-muted-foreground">{tx.category?.name || 'بدون تصنيف'}</p>
+                            <p class="truncate text-sm font-medium">{tx.description}</p>
+                            <p class="text-xs text-muted-foreground">{localizedName(tx.category) || t('transactions.no_category_label')}</p>
                         </div>
                         <p class="text-sm font-semibold {tx.type === 'expense' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
                             {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}

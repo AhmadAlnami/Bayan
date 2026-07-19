@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
-        title: 'تأكيد البريد الإلكتروني',
-        description: 'الرجاء تأكيد بريدك الإلكتروني بالضغط على الرابط اللي أرسلناه لك.',
+        title: '',
+        description: '',
     };
 </script>
 
@@ -13,6 +13,7 @@
     import { Spinner } from '@/components/ui/spinner';
     import { logout } from '@/routes';
     import { send } from '@/routes/verification';
+    import { t } from '@/lib/locale.svelte';
 
     let {
         status = '',
@@ -21,11 +22,11 @@
     } = $props();
 </script>
 
-<AppHead title="تأكيد البريد الإلكتروني" />
+<AppHead title={t('auth.verify_email')} />
 
 {#if status === 'verification-link-sent'}
     <div class="mb-4 text-center text-sm font-medium text-brand-green-dark dark:text-brand-green">
-        تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني.
+        {t('auth.verification_sent')}
     </div>
 {/if}
 
@@ -33,11 +34,11 @@
     {#snippet children({ processing })}
         <Button type="submit" disabled={processing} variant="secondary">
             {#if processing}<Spinner />{/if}
-            إعادة إرسال بريد التأكيد
+            {t('auth.resend_verification')}
         </Button>
 
         <TextLink href={logout()} as="button" class="mx-auto block text-sm">
-            تسجيل الخروج
+            {t('nav.logout')}
         </TextLink>
     {/snippet}
 </Form>

@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
-        title: 'إنشاء حساب',
-        description: 'أدخل بياناتك لإنشاء حسابك في بيان',
+        title: '',
+        description: '',
     };
 </script>
 
@@ -17,11 +17,12 @@
     import { Spinner } from '@/components/ui/spinner';
     import { login } from '@/routes';
     import { store } from '@/routes/register';
+    import { t } from '@/lib/locale.svelte';
 
     let { passwordRules }: { passwordRules: string } = $props();
 </script>
 
-<AppHead title="إنشاء حساب" />
+<AppHead title={t('auth.register')} />
 
 <Form
     {...store.form()}
@@ -31,20 +32,20 @@
     {#snippet children({ errors, processing })}
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="name">الاسم</Label>
+                <Label for="name">{t('auth.name')}</Label>
                 <Input
                     id="name"
                     type="text"
                     required
                     autocomplete="name"
                     name="name"
-                    placeholder="الاسم الكامل"
+                    placeholder={t('auth.name_placeholder')}
                 />
                 <InputError message={errors.name} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="email">البريد الإلكتروني</Label>
+                <Label for="email">{t('auth.email')}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -57,26 +58,26 @@
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">كلمة المرور</Label>
+                <Label for="password">{t('auth.password')}</Label>
                 <PasswordInput
                     id="password"
                     required
                     autocomplete="new-password"
                     name="password"
-                    placeholder="كلمة المرور"
+                    placeholder={t('auth.password')}
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">تأكيد كلمة المرور</Label>
+                <Label for="password_confirmation">{t('auth.confirm_password_field')}</Label>
                 <PasswordInput
                     id="password_confirmation"
                     required
                     autocomplete="new-password"
                     name="password_confirmation"
-                    placeholder="تأكيد كلمة المرور"
+                    placeholder={t('auth.confirm_password_field')}
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password_confirmation} />
@@ -89,14 +90,14 @@
                 data-test="register-user-button"
             >
                 {#if processing}<Spinner />{/if}
-                إنشاء حساب
+                {t('auth.register_button')}
             </Button>
         </div>
 
         <div class="text-center text-sm text-muted-foreground">
-            عندك حساب؟
+            {t('auth.has_account')}
             <TextLink href={login()} class="underline underline-offset-4">
-                دخول
+                {t('auth.login_now')}
             </TextLink>
         </div>
     {/snippet}

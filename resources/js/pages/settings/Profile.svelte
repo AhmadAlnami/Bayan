@@ -4,7 +4,7 @@
     export const layout = {
         breadcrumbs: [
             {
-                title: 'إعدادات الملف الشخصي',
+                title: 'Profile',
                 href: edit(),
             },
         ],
@@ -23,19 +23,20 @@
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import { send } from '@/routes/verification';
+    import { t } from '@/lib/locale.svelte';
 
     const user = $derived(page.props.auth.user);
 </script>
 
-<AppHead title="إعدادات الملف الشخصي" />
+<AppHead title={t('profile.title')} />
 
-<h1 class="sr-only">إعدادات الملف الشخصي</h1>
+<h1 class="sr-only">{t('profile.title')}</h1>
 
 <div class="flex flex-col space-y-6">
     <Heading
         variant="small"
-        title="الملف الشخصي"
-        description="حدّث اسمك وبريدك الإلكتروني"
+        title={t('profile.title')}
+        description={t('profile.description')}
     />
 
     <Form
@@ -45,7 +46,7 @@
     >
         {#snippet children({ errors, processing })}
             <div class="grid gap-2">
-                <Label for="name">الاسم</Label>
+                <Label for="name">{t('auth.name')}</Label>
                 <Input
                     id="name"
                     name="name"
@@ -53,13 +54,13 @@
                     value={user.name}
                     required
                     autocomplete="name"
-                    placeholder="الاسم الكامل"
+                    placeholder={t('auth.name_placeholder')}
                 />
                 <InputError class="mt-2" message={errors.name} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="email">البريد الإلكتروني</Label>
+                <Label for="email">{t('auth.email')}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -76,15 +77,15 @@
             {#if Boolean(page.props.mustVerifyEmail) && !user.email_verified_at}
                 <div>
                     <p class="-mt-4 text-sm text-muted-foreground">
-                        بريدك الإلكتروني غير مؤكد.
+                        {t('profile.email_unverified')}
                         <TextLink href={send()} as="button">
-                            اضغط هنا لإعادة إرسال بريد التأكيد.
+                            {t('profile.click_resend')}
                         </TextLink>
                     </p>
 
                     {#if page.props.status === 'verification-link-sent'}
                         <div class="mt-2 text-sm font-medium text-brand-green-dark dark:text-brand-green">
-                            تم إرسال رابط تأكيد جديد إلى بريدك الإلكتروني.
+                            {t('profile.verification_sent')}
                         </div>
                     {/if}
                 </div>
@@ -95,7 +96,7 @@
                     type="submit"
                     class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90"
                     disabled={processing}
-                    data-test="update-profile-button">حفظ</Button
+                    data-test="update-profile-button">{t('profile.save')}</Button
                 >
             </div>
         {/snippet}

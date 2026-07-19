@@ -6,13 +6,14 @@
     import { toUrl } from '@/lib/utils';
     import { dashboard } from '@/routes';
     import { currentUrlState } from '@/lib/currentUrl.svelte';
+    import { t } from '@/lib/locale.svelte';
 
     const url = currentUrlState();
 
     const tabs = [
-        { title: 'الرئيسية', href: toUrl(dashboard()), icon: LayoutGrid },
-        { title: 'المصروفات', href: '/transactions/expenses', icon: ArrowUpRight },
-        { title: 'الدخل', href: '/transactions/income', icon: ArrowDownLeft },
+        { title: () => t('nav.dashboard'), href: toUrl(dashboard()), icon: LayoutGrid },
+        { title: () => t('nav.expenses'), href: '/transactions/expenses', icon: ArrowUpRight },
+        { title: () => t('nav.income'), href: '/transactions/income', icon: ArrowDownLeft },
     ];
 </script>
 
@@ -24,7 +25,7 @@
                 class="flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium transition-colors {url.isCurrentOrParentUrl(tab.href, url.currentUrl) ? 'text-brand-green-dark dark:text-brand-green' : 'text-muted-foreground'}"
             >
                 <tab.icon class="size-5" />
-                <span>{tab.title}</span>
+                <span>{tab.title()}</span>
             </Link>
         {/each}
     </div>

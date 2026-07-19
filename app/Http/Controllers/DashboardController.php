@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
-use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -29,14 +27,15 @@ class DashboardController extends Controller
             ->where('transactions.type', 'expense')
             ->where('transaction_date', '>=', $currentMonth)
             ->join('categories', 'transactions.category_id', '=', 'categories.id')
-            ->selectRaw('categories.name, categories.color, SUM(transactions.amount) as total')
-            ->groupBy('categories.id', 'categories.name', 'categories.color')
+            ->selectRaw('categories.name, categories.name_en, categories.color, SUM(transactions.amount) as total')
+            ->groupBy('categories.id', 'categories.name', 'categories.name_en', 'categories.color')
             ->orderByDesc('total')
             ->get()
             ->map(function ($item) use ($thisMonthExpenses) {
                 $item->percentage = $thisMonthExpenses > 0
                     ? round(($item->total / $thisMonthExpenses) * 100)
                     : 0;
+
                 return $item;
             });
 
@@ -54,6 +53,7 @@ class DashboardController extends Controller
                 'transaction_date' => $t->transaction_date->format('Y-m-d'),
                 'category' => $t->category ? [
                     'name' => $t->category->name,
+                    'name_en' => $t->category->name_en,
                     'color' => $t->category->color,
                 ] : null,
             ]);

@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
-        title: 'تسجيل الدخول',
-        description: 'أدخل بريدك الإلكتروني وكلمة المرور للدخول إلى حسابك',
+        title: '',
+        description: '',
     };
 </script>
 
@@ -20,6 +20,7 @@
     import { register } from '@/routes';
     import { store } from '@/routes/login';
     import { request } from '@/routes/password';
+    import { t } from '@/lib/locale.svelte';
 
     let {
         status = '',
@@ -28,9 +29,15 @@
         status?: string;
         canResetPassword: boolean;
     } = $props();
+
+    $effect(() => {
+        import('@/layouts/AuthLayout.svelte').then(m => {
+            m.default;
+        });
+    });
 </script>
 
-<AppHead title="تسجيل الدخول" />
+<AppHead title={t('auth.login')} />
 
 {#if status}
     <div class="mb-4 text-center text-sm font-medium text-brand-green-dark dark:text-brand-green">
@@ -48,7 +55,7 @@
     {#snippet children({ errors, processing })}
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">البريد الإلكتروني</Label>
+                <Label for="email">{t('auth.email')}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -62,10 +69,10 @@
 
             <div class="grid gap-2">
                 <div class="flex items-center justify-between">
-                    <Label for="password">كلمة المرور</Label>
+                    <Label for="password">{t('auth.password')}</Label>
                     {#if canResetPassword}
                         <TextLink href={request()} class="text-sm">
-                            نسيت كلمة المرور؟
+                            {t('auth.forgot_link')}
                         </TextLink>
                     {/if}
                 </div>
@@ -74,7 +81,7 @@
                     name="password"
                     required
                     autocomplete="current-password"
-                    placeholder="كلمة المرور"
+                    placeholder={t('auth.password')}
                 />
                 <InputError message={errors.password} />
             </div>
@@ -82,7 +89,7 @@
             <div class="flex items-center justify-between">
                 <Label for="remember" class="flex items-center space-x-3 space-x-reverse">
                     <Checkbox id="remember" name="remember" />
-                    <span>تذكرني</span>
+                    <span>{t('auth.remember_me')}</span>
                 </Label>
             </div>
 
@@ -93,13 +100,13 @@
                 data-test="login-button"
             >
                 {#if processing}<Spinner />{/if}
-                دخول
+                {t('auth.login_button')}
             </Button>
         </div>
 
         <div class="text-center text-sm text-muted-foreground">
-            ما عندك حساب؟
-            <TextLink href={register()}>سجّل الآن</TextLink>
+            {t('auth.no_account')}
+            <TextLink href={register()}>{t('auth.signup_now')}</TextLink>
         </div>
     {/snippet}
 </Form>

@@ -2,6 +2,7 @@
     import { Link } from '@inertiajs/svelte';
     import type { Snippet } from 'svelte';
     import Wallet from 'lucide-svelte/icons/wallet';
+    import { t } from '@/lib/locale.svelte';
     import { home } from '@/routes';
 
     let {
@@ -17,24 +18,23 @@
 
 <div
     class="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10"
-    dir="rtl"
 >
     <div class="w-full max-w-sm">
         <div class="flex flex-col gap-8">
             <div class="flex flex-col items-center gap-4">
                 <Link
                     href={home()}
-                    class="flex flex-col items-center gap-2 font-medium"
+                    class="flex cursor-pointer flex-col items-center gap-2 rounded-lg p-2 font-medium transition-colors hover:bg-muted"
                 >
                     <div
-                        class="mb-1 flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green"
+                        class="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-green"
                     >
                         <Wallet class="size-6 text-brand-teal-deep" />
                     </div>
-                    <span class="text-lg font-semibold text-ink dark:text-on-dark">بيان</span>
+                    <span class="text-lg font-semibold">{t('app.name')}</span>
                 </Link>
                 <div class="space-y-2 text-center">
-                    <h1 class="text-xl font-medium text-ink dark:text-on-dark">{title}</h1>
+                    <h1 class="text-xl font-medium">{title}</h1>
                     <p class="text-center text-sm text-muted-foreground">
                         {description}
                     </p>

@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
-        title: 'تأكيد كلمة المرور',
-        description: 'هذه منطقة آمنة من التطبيق. الرجاء تأكيد كلمة المرور قبل المتابعة.',
+        title: '',
+        description: '',
     };
 </script>
 
@@ -19,25 +19,26 @@
     import { Label } from '@/components/ui/label';
     import { Spinner } from '@/components/ui/spinner';
     import { store } from '@/routes/password/confirm';
+    import { t } from '@/lib/locale.svelte';
 </script>
 
-<AppHead title="تأكيد كلمة المرور" />
+<AppHead title={t('auth.confirm_password')} />
 
 <PasskeyVerify
     routes={{
         options: confirmOptions(),
         submit: confirmStore(),
     }}
-    label="التأكيد بمفتاح المرور"
-    loadingLabel="جاري التأكيد..."
-    separator="أو أكد بكلمة المرور"
+    label={t('auth.confirm_password')}
+    loadingLabel={t('common.loading')}
+    separator={t('auth.or')}
 />
 
 <Form {...store.form()} resetOnSuccess>
     {#snippet children({ errors, processing })}
         <div class="space-y-6">
             <div class="grid gap-2">
-                <Label for="password">كلمة المرور</Label>
+                <Label for="password">{t('auth.password')}</Label>
                 <PasswordInput
                     id="password"
                     name="password"
@@ -56,7 +57,7 @@
                     data-test="confirm-password-button"
                 >
                     {#if processing}<Spinner />{/if}
-                    تأكيد كلمة المرور
+                    {t('auth.confirm_password')}
                 </Button>
             </div>
         </div>

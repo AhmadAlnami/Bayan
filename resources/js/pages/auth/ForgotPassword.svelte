@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
-        title: 'نسيت كلمة المرور',
-        description: 'أدخل بريدك الإلكتروني لإرسال رابط إعادة تعيين كلمة المرور',
+        title: '',
+        description: '',
     };
 </script>
 
@@ -16,6 +16,7 @@
     import { Spinner } from '@/components/ui/spinner';
     import { login } from '@/routes';
     import { email } from '@/routes/password';
+    import { t } from '@/lib/locale.svelte';
 
     let {
         status = '',
@@ -24,7 +25,7 @@
     } = $props();
 </script>
 
-<AppHead title="نسيت كلمة المرور" />
+<AppHead title={t('auth.forgot_password')} />
 
 {#if status}
     <div class="mb-4 text-center text-sm font-medium text-brand-green-dark dark:text-brand-green">
@@ -36,7 +37,7 @@
     <Form {...email.form()}>
         {#snippet children({ errors, processing })}
             <div class="grid gap-2">
-                <Label for="email">البريد الإلكتروني</Label>
+                <Label for="email">{t('auth.email')}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -55,14 +56,14 @@
                     data-test="email-password-reset-link-button"
                 >
                     {#if processing}<Spinner />{/if}
-                    إرسال رابط إعادة التعيين
+                    {t('auth.send_reset_link')}
                 </Button>
             </div>
         {/snippet}
     </Form>
 
     <div class="text-center text-sm text-muted-foreground">
-        أو
-        <TextLink href={login()}>ارجع لتسجيل الدخول</TextLink>
+        {t('auth.or')}
+        <TextLink href={login()}>{t('auth.back_to_login')}</TextLink>
     </div>
 </div>

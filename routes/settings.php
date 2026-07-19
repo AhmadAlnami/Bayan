@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\LanguageController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\SalaryController;
 use App\Http\Controllers\Settings\SecurityController;
@@ -25,6 +26,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('user-password.update');
 
     Route::inertia('settings/appearance', 'settings/Appearance')->name('appearance.edit');
+
+    Route::get('settings/language', [LanguageController::class, 'edit'])->name('language.edit');
+    Route::patch('settings/language', [LanguageController::class, 'update'])->name('language.update');
 
     Route::get('settings/salary', [SalaryController::class, 'edit'])->name('salary.edit');
     Route::patch('settings/salary', [SalaryController::class, 'update'])->name('salary.update');

@@ -2,13 +2,14 @@
     import { Link } from '@inertiajs/svelte';
     import type { Snippet } from 'svelte';
     import Heading from '@/components/Heading.svelte';
-    import { Button } from '@/components/ui/button';
     import { Separator } from '@/components/ui/separator';
     import { currentUrlState } from '@/lib/currentUrl.svelte';
     import { toUrl } from '@/lib/utils';
     import { edit as editAppearance } from '@/routes/appearance';
+    import { edit as editLanguage } from '@/routes/language';
     import { edit as editProfile } from '@/routes/profile';
     import { edit as editSecurity } from '@/routes/security';
+    import { t } from '@/lib/locale.svelte';
     import type { NavItem } from '@/types';
 
     let {
@@ -17,21 +18,25 @@
         children?: Snippet;
     } = $props();
 
-    const sidebarNavItems: NavItem[] = [
+    const sidebarNavItems = [
         {
-            title: 'الملف الشخصي',
+            title: () => t('settings.profile'),
             href: editProfile(),
         },
         {
-            title: 'الأمان',
+            title: () => t('settings.security'),
             href: editSecurity(),
         },
         {
-            title: 'المظهر',
+            title: () => t('settings.appearance'),
             href: editAppearance(),
         },
         {
-            title: 'الراتب',
+            title: () => t('settings.language'),
+            href: editLanguage(),
+        },
+        {
+            title: () => t('settings.salary'),
             href: '/settings/salary',
         },
     ];
@@ -39,38 +44,30 @@
     const url = currentUrlState();
 </script>
 
-<div class="px-4 py-6" dir="rtl">
+<div class="px-4 py-6">
     <Heading
-        title="الإعدادات"
-        description="إدارة إعدادات ملفك الشخصي وحسابك"
+        title={t('settings.title')}
+        description={t('settings.description')}
     />
 
     <div class="flex flex-col lg:flex-row lg:space-x-12 lg:space-x-reverse">
         <aside class="w-full max-w-xl lg:w-48">
             <nav
                 class="flex flex-col space-y-1"
-                aria-label="الإعدادات"
+                aria-label={t('settings.title')}
             >
                 {#each sidebarNavItems as item (toUrl(item.href))}
-                    <Button
-                        variant="ghost"
-                        class="w-full justify-start rounded-full {url.isCurrentUrl(
+                    <Link
+                        href={toUrl(item.href)}
+                        class="inline-flex w-full items-center justify-start rounded-full px-3 py-2 text-sm font-medium transition-colors hover:bg-muted {url.isCurrentUrl(
                             item.href,
                             url.currentUrl,
                         )
                             ? 'bg-brand-green-soft text-brand-green-dark dark:bg-brand-green/10 dark:text-brand-green'
-                            : ''}"
-                        asChild
+                            : 'text-muted-foreground hover:text-ink dark:hover:text-on-dark'}"
                     >
-                        {#snippet children(props)}
-                            <Link
-                                {...(props || {})}
-                                href={toUrl(item.href)}
-                            >
-                                {item.title}
-                            </Link>
-                        {/snippet}
-                    </Button>
+                        {item.title()}
+                    </Link>
                 {/each}
             </nav>
         </aside>

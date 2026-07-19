@@ -23,6 +23,7 @@
     import { toUrl } from '@/lib/utils';
     import { dashboard } from '@/routes';
     import { themeState } from '@/lib/theme.svelte';
+    import { t } from '@/lib/locale.svelte';
 
     const { appearance, updateAppearance } = themeState();
 
@@ -30,10 +31,14 @@
     const url = currentUrlState();
 
     const navItems = [
-        { title: 'لوحة التحكم', href: toUrl(dashboard()), icon: LayoutGrid },
-        { title: 'المصروفات', href: '/transactions/expenses', icon: ArrowUpRight },
-        { title: 'الدخل', href: '/transactions/income', icon: ArrowDownLeft },
+        { title: () => t('nav.dashboard'), href: toUrl(dashboard()), icon: LayoutGrid },
+        { title: () => t('nav.expenses'), href: '/transactions/expenses', icon: ArrowUpRight },
+        { title: () => t('nav.income'), href: '/transactions/income', icon: ArrowDownLeft },
     ];
+
+    function visitSettings(page: string) {
+        router.visit(page);
+    }
 </script>
 
 <header class="sticky top-0 z-40 hidden border-b border-hairline bg-white md:flex dark:bg-brand-teal-deep dark:border-hairline-dark">
@@ -49,7 +54,7 @@
                         class="inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors {url.isCurrentOrParentUrl(item.href, url.currentUrl) ? 'bg-brand-green-soft text-brand-green-dark dark:bg-brand-green/10 dark:text-brand-green' : 'text-muted-foreground hover:bg-muted hover:text-ink dark:hover:text-on-dark'}"
                     >
                         <item.icon class="size-4" />
-                        <span>{item.title}</span>
+                        <span>{item.title()}</span>
                     </Link>
                 {/each}
             </nav>
@@ -70,24 +75,20 @@
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" class="w-48">
-                    <div class="px-2 py-1.5 text-sm font-medium truncate text-ink dark:text-on-dark">{auth.user?.name}</div>
+                    <div class="px-2 py-1.5 text-sm font-medium truncate">{auth.user?.name}</div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                        <Link href="/settings/profile" class="cursor-pointer">
-                            <Settings class="size-4 mr-2" />
-                            الإعدادات
-                        </Link>
+                    <DropdownMenuItem onclick={() => visitSettings('/settings/profile')}>
+                        <Settings class="size-4 mr-2" />
+                        {t('nav.settings')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link href="/settings/salary" class="cursor-pointer">
-                            <Banknote class="size-4 mr-2" />
-                            إعدادات الراتب
-                        </Link>
+                    <DropdownMenuItem onclick={() => visitSettings('/settings/salary')}>
+                        <Banknote class="size-4 mr-2" />
+                        {t('settings.salary')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onclick={() => router.post('/logout')}>
                         <LogOut class="size-4 mr-2" />
-                        تسجيل الخروج
+                        {t('nav.logout')}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>
@@ -114,24 +115,20 @@
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" class="w-48">
-                    <div class="px-2 py-1.5 text-sm font-medium truncate text-ink dark:text-on-dark">{auth.user?.name}</div>
+                    <div class="px-2 py-1.5 text-sm font-medium truncate">{auth.user?.name}</div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                        <Link href="/settings/profile" class="cursor-pointer">
-                            <Settings class="size-4 mr-2" />
-                            الإعدادات
-                        </Link>
+                    <DropdownMenuItem onclick={() => visitSettings('/settings/profile')}>
+                        <Settings class="size-4 mr-2" />
+                        {t('nav.settings')}
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                        <Link href="/settings/salary" class="cursor-pointer">
-                            <Banknote class="size-4 mr-2" />
-                            إعدادات الراتب
-                        </Link>
+                    <DropdownMenuItem onclick={() => visitSettings('/settings/salary')}>
+                        <Banknote class="size-4 mr-2" />
+                        {t('settings.salary')}
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onclick={() => router.post('/logout')}>
                         <LogOut class="size-4 mr-2" />
-                        تسجيل الخروج
+                        {t('nav.logout')}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

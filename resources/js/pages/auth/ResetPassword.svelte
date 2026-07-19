@@ -1,7 +1,7 @@
 <script module lang="ts">
     export const layout = {
-        title: 'إعادة تعيين كلمة المرور',
-        description: 'أدخل كلمة المرور الجديدة أدناه',
+        title: '',
+        description: '',
     };
 </script>
 
@@ -15,6 +15,7 @@
     import { Label } from '@/components/ui/label';
     import { Spinner } from '@/components/ui/spinner';
     import { update } from '@/routes/password';
+    import { t } from '@/lib/locale.svelte';
 
     let {
         token,
@@ -27,7 +28,7 @@
     } = $props();
 </script>
 
-<AppHead title="إعادة تعيين كلمة المرور" />
+<AppHead title={t('auth.reset_password')} />
 
 <Form
     {...update.form()}
@@ -37,7 +38,7 @@
     {#snippet children({ errors, processing })}
         <div class="grid gap-6">
             <div class="grid gap-2">
-                <Label for="email">البريد الإلكتروني</Label>
+                <Label for="email">{t('auth.email')}</Label>
                 <Input
                     id="email"
                     type="email"
@@ -51,26 +52,26 @@
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">كلمة المرور الجديدة</Label>
+                <Label for="password">{t('auth.new_password')}</Label>
                 <PasswordInput
                     id="password"
                     name="password"
                     autocomplete="new-password"
                     class="mt-1 block w-full"
-                    placeholder="كلمة المرور الجديدة"
+                    placeholder={t('auth.new_password')}
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">تأكيد كلمة المرور</Label>
+                <Label for="password_confirmation">{t('auth.confirm_password_field')}</Label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
                     autocomplete="new-password"
                     class="mt-1 block w-full"
-                    placeholder="تأكيد كلمة المرور"
+                    placeholder={t('auth.confirm_password_field')}
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password_confirmation} />
@@ -83,7 +84,7 @@
                 data-test="reset-password-button"
             >
                 {#if processing}<Spinner />{/if}
-                إعادة تعيين كلمة المرور
+                {t('auth.reset_button')}
             </Button>
         </div>
     {/snippet}

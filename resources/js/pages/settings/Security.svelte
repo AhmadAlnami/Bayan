@@ -4,7 +4,7 @@
     export const layout = {
         breadcrumbs: [
             {
-                title: 'إعدادات الأمان',
+                title: 'Security',
                 href: edit(),
             },
         ],
@@ -23,6 +23,8 @@
     import PasswordInput from '@/components/PasswordInput.svelte';
     import { Button } from '@/components/ui/button';
     import { Label } from '@/components/ui/label';
+    import { t } from '@/lib/locale.svelte';
+
     const canManageTwoFactor = $derived(Boolean(page.props.canManageTwoFactor));
     const requiresConfirmation = $derived(
         Boolean(page.props.requiresConfirmation),
@@ -38,15 +40,15 @@
     let { passwordRules }: { passwordRules: string } = $props();
 </script>
 
-<AppHead title="إعدادات الأمان" />
+<AppHead title={t('settings.security')} />
 
-<h1 class="sr-only">إعدادات الأمان</h1>
+<h1 class="sr-only">{t('settings.security')}</h1>
 
 <div class="space-y-6">
     <Heading
         variant="small"
-        title="تحديث كلمة المرور"
-        description="تأكد أن حسابك يستخدم كلمة مرور قوية وآمنة"
+        title={t('security.title')}
+        description={t('security.description')}
     />
 
     <Form
@@ -58,38 +60,38 @@
     >
         {#snippet children({ errors, processing })}
             <div class="grid gap-2">
-                <Label for="current_password">كلمة المرور الحالية</Label>
+                <Label for="current_password">{t('security.current_password')}</Label>
                 <PasswordInput
                     id="current_password"
                     name="current_password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
-                    placeholder="كلمة المرور الحالية"
+                    placeholder={t('security.current_password_placeholder')}
                 />
                 <InputError message={errors.current_password} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">كلمة المرور الجديدة</Label>
+                <Label for="password">{t('security.new_password')}</Label>
                 <PasswordInput
                     id="password"
                     name="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    placeholder="كلمة المرور الجديدة"
+                    placeholder={t('security.new_password_placeholder')}
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password} />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">تأكيد كلمة المرور</Label>
+                <Label for="password_confirmation">{t('security.confirm_password')}</Label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    placeholder="تأكيد كلمة المرور"
+                    placeholder={t('security.confirm_password_placeholder')}
                     passwordrules={passwordRules}
                 />
                 <InputError message={errors.password_confirmation} />
@@ -102,7 +104,7 @@
                     disabled={processing}
                     data-test="update-password-button"
                 >
-                    حفظ
+                    {t('security.save')}
                 </Button>
             </div>
         {/snippet}

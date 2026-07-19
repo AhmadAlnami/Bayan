@@ -1,6 +1,6 @@
 <script module lang="ts">
     export const layout = {
-        breadcrumbs: [{ title: 'لوحة التحكم', href: '/dashboard' }],
+        breadcrumbs: [{ title: 'Dashboard', href: '/dashboard' }],
     };
 </script>
 
@@ -18,6 +18,7 @@
     import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
     import Send from 'lucide-svelte/icons/send';
+    import { t, localizedName } from '@/lib/locale.svelte';
 
     let { type = 'expense', transactions = [] as any[], categories = [] as any[] } = $props();
 
@@ -60,50 +61,50 @@
         });
     }
     function del(tx: any) {
-        if (confirm('حذف هذه المعاملة؟')) router.delete(`/transactions/${tx.id}`, { preserveScroll: true });
+        if (confirm(t('transactions.delete_confirm'))) router.delete(`/transactions/${tx.id}`, { preserveScroll: true });
     }
 
     function formatAmount(amount: number): string {
-        return new Intl.NumberFormat('ar-SA').format(amount) + ' ر.س';
+        return new Intl.NumberFormat('ar-SA').format(amount) + ' ' + t('common.sar');
     }
 </script>
 
-<AppHead title={type === 'expense' ? 'المصروفات' : 'الدخل'} />
+<AppHead title={type === 'expense' ? t('transactions.expenses') : t('transactions.income')} />
 
-<div class="flex h-full flex-col gap-6 p-4 md:p-6" dir="rtl">
+<div class="flex h-full flex-col gap-6 p-4 md:p-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold text-ink dark:text-on-dark">{type === 'expense' ? 'المصروفات' : 'الدخل'}</h1>
+        <h1 class="text-2xl font-semibold">{type === 'expense' ? t('transactions.expenses') : t('transactions.income')}</h1>
         <div class="flex gap-1">
-            <a href="/transactions/expenses" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'expense' ? 'bg-destructive text-white' : 'bg-muted text-muted-foreground'}">مصروفات</a>
-            <a href="/transactions/income" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'income' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted text-muted-foreground'}">دخل</a>
+            <a href="/transactions/expenses" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'expense' ? 'bg-destructive text-white' : 'bg-muted text-muted-foreground'}">{t('transactions.expenses_tab')}</a>
+            <a href="/transactions/income" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'income' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted text-muted-foreground'}">{t('transactions.income_tab')}</a>
         </div>
     </div>
 
     <form onsubmit={(e) => { e.preventDefault(); quickAdd(); }} class="flex gap-2">
-        <Input placeholder={type === 'expense' ? 'إضافة سريعة... 45 ريال قهوة' : 'إضافة سريعة... 5000 راتب'} bind:value={quickText} class="flex-1" />
+        <Input placeholder={type === 'expense' ? t('transactions.quick_add_expense') : t('transactions.quick_add_income')} bind:value={quickText} class="flex-1" />
         <Button type="submit" size="icon" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={quickLoading || !quickText.trim()}>
             {#if quickLoading}<Spinner class="size-4" />{:else}<Send class="size-4" />{/if}
         </Button>
         <Dialog open={showModal}>
-            <DialogTrigger asChild>
+            <DialogTrigger>
                 <Button onclick={openAddModal} variant="outline" size="icon" class="rounded-full"><Plus class="size-4" /></Button>
             </DialogTrigger>
             <DialogContent>
-                <DialogHeader><DialogTitle>{editingId ? 'تعديل' : (type === 'expense' ? 'إضافة مصروف' : 'إضافة دخل')}</DialogTitle></DialogHeader>
+                <DialogHeader><DialogTitle>{editingId ? t('transactions.edit') : (type === 'expense' ? t('transactions.add_expense') : t('transactions.add_income'))}</DialogTitle></DialogHeader>
                 <form onsubmit={(e) => { e.preventDefault(); save(); }} class="space-y-4">
-                    <div><Label>المبلغ</Label><Input type="number" step="0.01" bind:value={formAmount} required /></div>
-                    <div><Label>الوصف</Label><Input bind:value={formDescription} required /></div>
-                    <div><Label>التاريخ</Label><Input type="date" bind:value={formDate} required /></div>
+                    <div><Label>{t('transactions.amount')}</Label><Input type="number" step="0.01" bind:value={formAmount} required /></div>
+                    <div><Label>{t('transactions.description')}</Label><Input bind:value={formDescription} required /></div>
+                    <div><Label>{t('transactions.date')}</Label><Input type="date" bind:value={formDate} required /></div>
                     <div>
-                        <Label>التصنيف</Label>
+                        <Label>{t('transactions.category')}</Label>
                         <select bind:value={formCategoryId} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                            <option value="">بدون</option>
-                            {#each categories as c}<option value={c.id}>{c.name}</option>{/each}
+                            <option value="">{t('transactions.no_category')}</option>
+                            {#each categories as c}<option value={c.id}>{localizedName(c)}</option>{/each}
                         </select>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" type="button" onclick={() => showModal = false}>إلغاء</Button>
-                        <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={loading}>{#if loading}<Spinner class="mr-2" />{/if}{editingId ? 'حفظ' : 'إضافة'}</Button>
+                        <Button variant="outline" type="button" onclick={() => showModal = false}>{t('transactions.cancel')}</Button>
+                        <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={loading}>{#if loading}<Spinner class="mr-2" />{/if}{editingId ? t('transactions.save') : t('transactions.add')}</Button>
                     </DialogFooter>
                 </form>
             </DialogContent>
@@ -113,7 +114,7 @@
     {#if transactions.length > 0}
         <div class="rounded-xl border border-hairline bg-card dark:bg-card">
             <div class="flex items-center justify-between border-b border-hairline p-4">
-                <h3 class="font-semibold text-ink dark:text-on-dark">آخر المعاملات</h3>
+                <h3 class="font-semibold">{t('transactions.recent')}</h3>
             </div>
             <div class="space-y-2 p-4">
                 {#each transactions as tx}
@@ -126,8 +127,8 @@
                             {/if}
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-medium text-ink dark:text-on-dark">{tx.description}</p>
-                            <p class="text-xs text-muted-foreground">{tx.category?.name || 'بدون تصنيف'}</p>
+                            <p class="truncate text-sm font-medium">{tx.description}</p>
+                            <p class="text-xs text-muted-foreground">{localizedName(tx.category) || t('transactions.no_category_label')}</p>
                         </div>
                         <p class="text-sm font-semibold {tx.type === 'expense' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
                             {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
@@ -140,7 +141,7 @@
         </div>
     {:else}
         <div class="rounded-xl border border-dashed border-hairline p-12 text-center">
-            <p class="text-muted-foreground">لا توجد معاملات. أضف من الحقل أعلاه</p>
+            <p class="text-muted-foreground">{t('transactions.empty')}</p>
         </div>
     {/if}
 </div>

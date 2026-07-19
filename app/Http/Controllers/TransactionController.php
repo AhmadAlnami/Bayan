@@ -32,11 +32,12 @@ class TransactionController extends Controller
                 'category' => $t->category ? [
                     'id' => $t->category->id,
                     'name' => $t->category->name,
+                    'name_en' => $t->category->name_en,
                     'color' => $t->category->color,
                 ] : null,
             ]);
 
-        $categories = Category::where(function ($q) use ($request, $type) {
+        $categories = Category::where(function ($q) use ($request) {
             $q->whereNull('user_id')->orWhere('user_id', $request->user()->id);
         })
             ->where('type', $type)
@@ -44,6 +45,7 @@ class TransactionController extends Controller
             ->map(fn ($c) => [
                 'id' => $c->id,
                 'name' => $c->name,
+                'name_en' => $c->name_en,
                 'color' => $c->color,
             ]);
 
@@ -94,24 +96,31 @@ class TransactionController extends Controller
             'type' => 'required|in:expense,income',
         ]);
         $request->user()->transactions()->create($validated);
+
         return Redirect::back()->with('toast', ['type' => 'success', 'message' => 'تمت الإضافة']);
     }
 
     public function update(Request $request, Transaction $transaction): RedirectResponse
     {
-        if ($transaction->user_id !== $request->user()->id) abort(403);
+        if ($transaction->user_id !== $request->user()->id) {
+            abort(403);
+        }
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01', 'description' => 'required|string|max:255',
             'transaction_date' => 'required|date', 'category_id' => 'nullable|exists:categories,id',
         ]);
         $transaction->update($validated);
+
         return Redirect::back()->with('toast', ['type' => 'success', 'message' => 'تم التعديل']);
     }
 
     public function destroy(Request $request, Transaction $transaction): RedirectResponse
     {
-        if ($transaction->user_id !== $request->user()->id) abort(403);
+        if ($transaction->user_id !== $request->user()->id) {
+            abort(403);
+        }
         $transaction->delete();
+
         return Redirect::back()->with('toast', ['type' => 'success', 'message' => 'تم الحذف']);
     }
 }

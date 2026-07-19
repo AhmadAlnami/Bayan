@@ -10,6 +10,7 @@
         InputOTPSlot,
     } from '@/components/ui/input-otp';
     import { store } from '@/routes/two-factor/login';
+    import { t } from '@/lib/locale.svelte';
     import type { TwoFactorConfigContent } from '@/types';
 
     let showRecoveryInput = $state(false);
@@ -18,18 +19,16 @@
     const authConfigContent: TwoFactorConfigContent = $derived.by(() => {
         if (showRecoveryInput) {
             return {
-                title: 'رمز الاسترداد',
-                description:
-                    'الرجاء إدخال أحد رموز الاسترداد الطارئة للوصول إلى حسابك.',
-                buttonText: 'استخدم رمز المصادقة',
+                title: t('auth.recovery_code'),
+                description: t('auth.recovery_code_desc'),
+                buttonText: t('auth.use_auth_code'),
             };
         }
 
         return {
-            title: 'رمز المصادقة',
-            description:
-                'أدخل رمز المصادقة من تطبيق المصادقة الخاص بك.',
-            buttonText: 'استخدم رمز الاسترداد',
+            title: t('auth.auth_code'),
+            description: t('auth.auth_code_desc'),
+            buttonText: t('auth.use_recovery_code'),
         };
     });
 
@@ -47,7 +46,7 @@
     }
 </script>
 
-<AppHead title="المصادقة الثنائية" />
+<AppHead title={t('auth.two_factor')} />
 
 <div class="space-y-6">
     {#if !showRecoveryInput}
@@ -80,10 +79,10 @@
                     <InputError message={errors.code} />
                 </div>
                 <Button type="submit" class="w-full rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={processing}
-                    >متابعة</Button
+                    >{t('auth.continue')}</Button
                 >
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>أو يمكنك </span>
+                    <span>{t('auth.or_you_can')} </span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
@@ -100,16 +99,16 @@
                 <Input
                     name="recovery_code"
                     type="text"
-                    placeholder="أدخل رمز الاسترداد"
+                    placeholder={t('auth.enter_recovery')}
                     required
                 />
                 <InputError message={errors.recovery_code} />
                 <Button type="submit" class="w-full rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={processing}
-                    >متابعة</Button
+                    >{t('auth.continue')}</Button
                 >
 
                 <div class="text-center text-sm text-muted-foreground">
-                    <span>أو يمكنك </span>
+                    <span>{t('auth.or_you_can')} </span>
                     <button
                         type="button"
                         class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"

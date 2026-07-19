@@ -4,6 +4,7 @@
     import Sun from 'lucide-svelte/icons/sun';
     import type { Component, SvelteComponent } from 'svelte';
     import { themeState } from '@/lib/theme.svelte';
+    import { t } from '@/lib/locale.svelte';
     import type { Appearance } from '@/types';
 
     const { appearance, updateAppearance } = themeState();
@@ -12,11 +13,11 @@
         | Component<{ class?: string }>
         | (new (...args: any[]) => SvelteComponent<{ class?: string }>);
 
-    const tabs: { value: Appearance; Icon: IconComponent; label: string }[] = [
-        { value: 'light', Icon: Sun, label: 'Light' },
-        { value: 'dark', Icon: Moon, label: 'Dark' },
-        { value: 'system', Icon: Monitor, label: 'System' },
-    ];
+    const tabs = $derived([
+        { value: 'light' as Appearance, Icon: Sun, label: t('appearance.light') },
+        { value: 'dark' as Appearance, Icon: Moon, label: t('appearance.dark') },
+        { value: 'system' as Appearance, Icon: Monitor, label: t('appearance.system') },
+    ]);
 
     function handleAppearanceChange(value: Appearance) {
         updateAppearance(value);

@@ -4,7 +4,7 @@
     export const layout = {
         breadcrumbs: [
             {
-                title: 'إعدادات المظهر',
+                title: 'Appearance',
                 href: editAppearance(),
             },
         ],
@@ -15,17 +15,18 @@
     import AppearanceTabs from '@/components/AppearanceTabs.svelte';
     import AppHead from '@/components/AppHead.svelte';
     import Heading from '@/components/Heading.svelte';
+    import { t } from '@/lib/locale.svelte';
 </script>
 
-<AppHead title="إعدادات المظهر" />
+<AppHead title={t('appearance.title')} />
 
-<h1 class="sr-only">إعدادات المظهر</h1>
+<h1 class="sr-only">{t('appearance.title')}</h1>
 
 <div class="space-y-6">
     <Heading
         variant="small"
-        title="إعدادات المظهر"
-        description="غيّر مظهر التطبيق (فاتح أو داكن)"
+        title={t('appearance.title')}
+        description={t('appearance.description')}
     />
     <AppearanceTabs />
 </div>
