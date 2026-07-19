@@ -34,6 +34,19 @@
     let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
     let chatInput = $state('');
 
+    let quickText = $state('');
+    let quickType = $state<'expense' | 'income'>('expense');
+    let quickLoading = $state(false);
+
+    function quickAdd() {
+        if (!quickText.trim()) return;
+        quickLoading = true;
+        router.post('/transactions/quick', { text: quickText, type: quickType }, {
+            preserveScroll: true,
+            onFinish: () => { quickLoading = false; quickText = ''; },
+        });
+    }
+
     function sendChatMessage() {
         if (!chatInput.trim()) return;
         chatMessages = [...chatMessages, { role: 'user', content: chatInput }];
@@ -61,6 +74,37 @@
     <div>
         <h1 class="text-xl font-semibold sm:text-2xl">{t('dashboard.title')}</h1>
         <p class="text-sm text-muted-foreground">{t('dashboard.welcome')}</p>
+    </div>
+
+    <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card">
+        <form onsubmit={(e) => { e.preventDefault(); quickAdd(); }} class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div class="flex items-center gap-1 rounded-full bg-muted p-0.5">
+                <button
+                    type="button"
+                    onclick={() => quickType = 'expense'}
+                    class="rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:text-sm {quickType === 'expense' ? 'bg-destructive text-white' : 'text-muted-foreground'}"
+                >
+                    {t('transactions.expenses_tab')}
+                </button>
+                <button
+                    type="button"
+                    onclick={() => quickType = 'income'}
+                    class="rounded-full px-3 py-1.5 text-xs font-medium transition-all sm:text-sm {quickType === 'income' ? 'bg-brand-green text-brand-teal-deep' : 'text-muted-foreground'}"
+                >
+                    {t('transactions.income_tab')}
+                </button>
+            </div>
+            <div class="flex flex-1 gap-2">
+                <Input
+                    placeholder={quickType === 'expense' ? t('transactions.quick_add_expense') : t('transactions.quick_add_income')}
+                    class="flex-1"
+                    bind:value={quickText}
+                />
+                <Button type="submit" size="icon" class="shrink-0 rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={quickLoading || !quickText.trim()}>
+                    <Send class="size-4" />
+                </Button>
+            </div>
+        </form>
     </div>
 
     <div class="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
