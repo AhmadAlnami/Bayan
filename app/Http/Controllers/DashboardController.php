@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -58,6 +59,49 @@ class DashboardController extends Controller
                 ] : null,
             ]);
 
+        $sixMonthsAgo = now()->subMonths(5)->startOfMonth();
+
+        $monthlyTotals = $user->transactions()
+            ->where('transaction_date', '>=', $sixMonthsAgo)
+            ->selectRaw("strftime('%Y-%m', transaction_date) as month")
+            ->selectRaw("SUM(CASE WHEN type = 'expense' THEN amount ELSE 0 END) as expenses")
+            ->selectRaw("SUM(CASE WHEN type = 'income' THEN amount ELSE 0 END) as income")
+            ->groupBy(DB::raw("strftime('%Y-%m', transaction_date)"))
+            ->orderBy('month')
+            ->get();
+
+        $monthlyChart = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $key = $month->format('Y-m');
+            $found = $monthlyTotals->firstWhere('month', $key);
+            $monthlyChart[] = [
+                'month' => $month->translatedFormat('M'),
+                'expenses' => (float) ($found->expenses ?? 0),
+                'income' => (float) ($found->income ?? 0),
+            ];
+        }
+
+        $dailyExpenses = $user->transactions()
+            ->where('type', 'expense')
+            ->where('transaction_date', '>=', $currentMonth)
+            ->selectRaw("strftime('%d', transaction_date) as day")
+            ->selectRaw('SUM(amount) as total')
+            ->groupBy(DB::raw("strftime('%d', transaction_date)"))
+            ->orderBy('day')
+            ->get();
+
+        $daysInMonth = (int) now()->daysInMonth;
+        $dailyChart = [];
+        for ($d = 1; $d <= $daysInMonth; $d++) {
+            $day = str_pad((string) $d, 2, '0', STR_PAD_LEFT);
+            $found = $dailyExpenses->firstWhere('day', $day);
+            $dailyChart[] = [
+                'day' => (string) $d,
+                'total' => (float) ($found->total ?? 0),
+            ];
+        }
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'total_expenses' => $user->transactions()->where('type', 'expense')->sum('amount'),
@@ -68,6 +112,8 @@ class DashboardController extends Controller
                 'this_month_income' => $thisMonthIncome,
             ],
             'categoryBreakdown' => $categoryBreakdown->values(),
+            'monthlyChart' => $monthlyChart,
+            'dailyChart' => $dailyChart,
             'recentTransactions' => $recentTransactions->values(),
         ]);
     }

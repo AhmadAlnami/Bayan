@@ -44,7 +44,7 @@
     const url = currentUrlState();
 </script>
 
-<div class="px-4 py-6">
+<div class="mx-auto w-full max-w-4xl px-3 py-6 sm:px-6 min-w-0">
     <Heading
         title={t('settings.title')}
         description={t('settings.description')}

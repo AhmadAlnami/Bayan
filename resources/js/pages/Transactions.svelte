@@ -71,9 +71,9 @@
 
 <AppHead title={type === 'expense' ? t('transactions.expenses') : t('transactions.income')} />
 
-<div class="flex h-full flex-col gap-6 p-4 md:p-6">
+<div class="min-w-0 space-y-4 p-4 sm:space-y-6 sm:p-6">
     <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-semibold">{type === 'expense' ? t('transactions.expenses') : t('transactions.income')}</h1>
+        <h1 class="text-xl font-semibold sm:text-2xl">{type === 'expense' ? t('transactions.expenses') : t('transactions.income')}</h1>
         <div class="flex gap-1">
             <a href="/transactions/expenses" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'expense' ? 'bg-destructive text-white' : 'bg-muted text-muted-foreground'}">{t('transactions.expenses_tab')}</a>
             <a href="/transactions/income" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'income' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted text-muted-foreground'}">{t('transactions.income_tab')}</a>
@@ -113,35 +113,35 @@
 
     {#if transactions.length > 0}
         <div class="rounded-xl border border-hairline bg-card dark:bg-card">
-            <div class="flex items-center justify-between border-b border-hairline p-4">
-                <h3 class="font-semibold">{t('transactions.recent')}</h3>
+            <div class="flex items-center justify-between border-b border-hairline p-3 sm:p-4">
+                <h3 class="text-sm font-semibold sm:text-base">{t('transactions.recent')}</h3>
             </div>
-            <div class="space-y-2 p-4">
+            <div class="space-y-1 p-2 sm:space-y-2 sm:p-4">
                 {#each transactions as tx}
-                    <div class="flex items-center gap-3 rounded-lg p-2 hover:bg-muted/50">
-                        <div class="flex h-8 w-8 items-center justify-center rounded-full" style="background-color: {tx.category?.color || '#6b7280'}20">
+                    <div class="flex items-center gap-2 rounded-lg p-1.5 hover:bg-muted/50 sm:gap-3 sm:p-2">
+                        <div class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full sm:h-8 sm:w-8" style="background-color: {tx.category?.color || '#6b7280'}20">
                             {#if tx.type === 'expense'}
-                                <ArrowUpRight class="size-4" style="color: {tx.category?.color || '#6b7280'}" />
+                                <ArrowUpRight class="size-3.5 sm:size-4" style="color: {tx.category?.color || '#6b7280'}" />
                             {:else}
-                                <ArrowDownLeft class="size-4" style="color: {tx.category?.color || '#6b7280'}" />
+                                <ArrowDownLeft class="size-3.5 sm:size-4" style="color: {tx.category?.color || '#6b7280'}" />
                             {/if}
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-medium">{tx.description}</p>
-                            <p class="text-xs text-muted-foreground">{localizedName(tx.category) || t('transactions.no_category_label')}</p>
+                            <p class="truncate text-xs font-medium sm:text-sm">{tx.description}</p>
+                            <p class="text-[10px] text-muted-foreground sm:text-xs">{localizedName(tx.category) || t('transactions.no_category_label')}</p>
                         </div>
-                        <p class="text-sm font-semibold {tx.type === 'expense' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
+                        <p class="text-xs font-semibold sm:text-sm {tx.type === 'expense' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
                             {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}
                         </p>
-                        <Button variant="ghost" size="icon" class="size-7" onclick={() => openEditModal(tx)}><Pencil class="size-3" /></Button>
-                        <Button variant="ghost" size="icon" class="size-7" onclick={() => del(tx)}><Trash2 class="size-3 text-destructive" /></Button>
+                        <Button variant="ghost" size="icon" class="size-6 sm:size-7" onclick={() => openEditModal(tx)}><Pencil class="size-3" /></Button>
+                        <Button variant="ghost" size="icon" class="size-6 sm:size-7" onclick={() => del(tx)}><Trash2 class="size-3 text-destructive" /></Button>
                     </div>
                 {/each}
             </div>
         </div>
     {:else}
-        <div class="rounded-xl border border-dashed border-hairline p-12 text-center">
-            <p class="text-muted-foreground">{t('transactions.empty')}</p>
+        <div class="rounded-xl border border-dashed border-hairline p-8 text-center sm:p-12">
+            <p class="text-xs text-muted-foreground sm:text-sm">{t('transactions.empty')}</p>
         </div>
     {/if}
 </div>

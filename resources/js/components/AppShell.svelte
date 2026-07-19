@@ -21,7 +21,7 @@
 </script>
 
 {#if variant === 'header'}
-    <div dir={dir} class="flex min-h-screen w-full flex-col {className}">
+    <div dir={dir} class="flex min-h-screen w-full flex-col overflow-x-hidden {className}">
         {@render children?.()}
     </div>
 {:else}
