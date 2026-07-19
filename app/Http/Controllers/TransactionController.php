@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Transaction;
+use App\Services\AutoCategorizer;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -75,17 +76,31 @@ class TransactionController extends Controller
         }
 
         if ($amount <= 0) {
-            return Redirect::back()->with('toast', ['type' => 'error', 'message' => 'الرجاء إدخال المبلغ أولاً، مثال: 45 ريال قهوة']);
+            return Redirect::back()->with('toast', ['type' => 'error', 'message' => app()->getLocale() === 'en' ? 'Please enter the amount first, e.g. 45 coffee' : 'الرجاء إدخال المبلغ أولاً، مثال: 45 ريال قهوة']);
         }
 
-        $category = Category::where('type', $request->type)->whereNull('user_id')->where('name', 'أخرى')->first();
+        $autoCategorizer = new AutoCategorizer;
+        $categoryId = $autoCategorizer->categorize($description, $request->type);
+
+        if (! $categoryId) {
+            $categoryId = Category::where('type', $request->type)->whereNull('user_id')->where('name', 'أخرى')->first()?->id;
+        }
 
         $request->user()->transactions()->create([
             'amount' => $amount, 'description' => $description ?: 'معاملة سريعة',
-            'transaction_date' => Carbon::today(), 'category_id' => $category?->id, 'type' => $request->type,
+            'transaction_date' => Carbon::today(), 'category_id' => $categoryId, 'type' => $request->type,
         ]);
 
-        return Redirect::back()->with('toast', ['type' => 'success', 'message' => 'تمت الإضافة']);
+        $locale = app()->getLocale();
+        $categoryName = $locale === 'en'
+            ? (Category::find($categoryId)?->name_en ?? '')
+            : (Category::find($categoryId)?->name ?? '');
+
+        $message = $locale === 'en'
+            ? 'Added: '.$description.($categoryName ? ' - '.$categoryName : '')
+            : 'تمت الإضافة: '.$description.($categoryName ? ' - '.$categoryName : '');
+
+        return Redirect::back()->with('toast', ['type' => 'success', 'message' => $message]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -95,15 +110,30 @@ class TransactionController extends Controller
             'transaction_date' => 'required|date', 'category_id' => 'nullable|exists:categories,id',
             'type' => 'required|in:expense,income',
         ]);
+
+        if (empty($validated['category_id'])) {
+            $autoCategorizer = new AutoCategorizer;
+            $validated['category_id'] = $autoCategorizer->categorize($validated['description'], $validated['type']);
+        }
+
         $request->user()->transactions()->create($validated);
 
-        return Redirect::back()->with('toast', ['type' => 'success', 'message' => 'تمت الإضافة']);
+        $locale = app()->getLocale();
+        $categoryName = $locale === 'en'
+            ? (Category::find($validated['category_id'])?->name_en ?? '')
+            : (Category::find($validated['category_id'])?->name ?? '');
+
+        $message = $locale === 'en'
+            ? 'Added: '.$validated['description'].($categoryName ? ' - '.$categoryName : '')
+            : 'تمت الإضافة: '.$validated['description'].($categoryName ? ' - '.$categoryName : '');
+
+        return Redirect::back()->with('toast', ['type' => 'success', 'message' => $message]);
     }
 
     public function update(Request $request, Transaction $transaction): RedirectResponse
     {
         if ($transaction->user_id !== $request->user()->id) {
-            abort(403);
+            return Redirect::back()->with('toast', ['type' => 'error', 'message' => app()->getLocale() === 'en' ? 'You are not authorized to do this.' : 'غير مصرح لك بتنفيذ هذا الإجراء']);
         }
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01', 'description' => 'required|string|max:255',
@@ -111,16 +141,20 @@ class TransactionController extends Controller
         ]);
         $transaction->update($validated);
 
-        return Redirect::back()->with('toast', ['type' => 'success', 'message' => 'تم التعديل']);
+        $message = app()->getLocale() === 'en' ? 'Updated.' : 'تم التعديل';
+
+        return Redirect::back()->with('toast', ['type' => 'success', 'message' => $message]);
     }
 
     public function destroy(Request $request, Transaction $transaction): RedirectResponse
     {
         if ($transaction->user_id !== $request->user()->id) {
-            abort(403);
+            return Redirect::back()->with('toast', ['type' => 'error', 'message' => app()->getLocale() === 'en' ? 'You are not authorized to do this.' : 'غير مصرح لك بتنفيذ هذا الإجراء']);
         }
         $transaction->delete();
 
-        return Redirect::back()->with('toast', ['type' => 'success', 'message' => 'تم الحذف']);
+        $message = app()->getLocale() === 'en' ? 'Deleted.' : 'تم الحذف';
+
+        return Redirect::back()->with('toast', ['type' => 'success', 'message' => $message]);
     }
 }

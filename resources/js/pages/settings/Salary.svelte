@@ -27,7 +27,7 @@
 
 <h1 class="sr-only">{t('salary.title')}</h1>
 
-<div class="flex flex-col space-y-6">
+<div class="animate-fade-in-up flex flex-col space-y-6">
     <Heading
         variant="small"
         title={t('salary.title')}

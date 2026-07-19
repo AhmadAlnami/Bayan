@@ -27,7 +27,7 @@
 <Form
     {...store.form()}
     resetOnSuccess={['password', 'password_confirmation']}
-    class="flex flex-col gap-6"
+    class="animate-fade-in-up flex flex-col gap-6"
 >
     {#snippet children({ errors, processing })}
         <div class="grid gap-6">

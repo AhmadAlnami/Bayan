@@ -18,7 +18,11 @@
     import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
     import Send from 'lucide-svelte/icons/send';
-    import { t, localizedName } from '@/lib/locale.svelte';
+    import { t, localizedName, localeState } from '@/lib/locale.svelte';
+    import ConfirmDialog from '@/components/ConfirmDialog.svelte';
+    import PullToRefresh from '@/components/PullToRefresh.svelte';
+
+    const { locale } = localeState();
 
     let { type = 'expense', transactions = [] as any[], categories = [] as any[] } = $props();
 
@@ -31,6 +35,30 @@
     let loading = $state(false);
     let quickText = $state('');
     let quickLoading = $state(false);
+
+    let showConfirmDelete = $state(false);
+    let deleteTarget = $state<any>(null);
+
+    let swipeStart = $state(0);
+    let swipeAnimating = $state<'left' | 'right' | null>(null);
+
+    function onSwipeStart(e: TouchEvent) {
+        swipeStart = e.touches[0].clientX;
+    }
+
+    function onSwipeEnd(e: TouchEvent) {
+        if (!e.changedTouches.length) return;
+        const diff = e.changedTouches[0].clientX - swipeStart;
+        if (Math.abs(diff) < 60) return;
+
+        swipeAnimating = diff > 0 ? 'right' : 'left';
+        const nextType = diff > 0 ? 'expense' : 'income';
+        setTimeout(() => {
+            router.visit(nextType === 'expense' ? '/transactions/expenses' : '/transactions/income');
+        }, 300);
+    }
+
+    const transClass = $derived(swipeAnimating === 'left' ? 'animate-slide-out-left' : swipeAnimating === 'right' ? 'animate-slide-out-right' : '');
 
     function openAddModal() {
         formAmount = ''; formDescription = ''; formCategoryId = '';
@@ -61,20 +89,34 @@
         });
     }
     function del(tx: any) {
-        if (confirm(t('transactions.delete_confirm'))) router.delete(`/transactions/${tx.id}`, { preserveScroll: true });
+        deleteTarget = tx;
+        showConfirmDelete = true;
+    }
+    function confirmDelete() {
+        if (deleteTarget) router.delete(`/transactions/${deleteTarget.id}`, { preserveScroll: true });
+        showConfirmDelete = false;
+        deleteTarget = null;
     }
 
     function formatAmount(amount: number): string {
-        return new Intl.NumberFormat('ar-SA').format(amount) + ' ' + t('common.sar');
+        const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+        return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 </script>
 
 <AppHead title={type === 'expense' ? t('transactions.expenses') : t('transactions.income')} />
 
-<div class="min-w-0 space-y-4 p-4 sm:space-y-6 sm:p-6">
+<PullToRefresh>
+    <div
+        class="min-w-0 space-y-4 p-4 sm:space-y-6 sm:p-6 {transClass}"
+        ontouchstart={onSwipeStart}
+        ontouchend={onSwipeEnd}
+        role="region"
+        aria-label="Swipeable content"
+    >
     <div class="flex items-center justify-between">
         <h1 class="text-xl font-semibold sm:text-2xl">{type === 'expense' ? t('transactions.expenses') : t('transactions.income')}</h1>
-        <div class="flex gap-1">
+        <div class="animate-fade-in-up flex gap-1">
             <a href="/transactions/expenses" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'expense' ? 'bg-destructive text-white' : 'bg-muted text-muted-foreground'}">{t('transactions.expenses_tab')}</a>
             <a href="/transactions/income" class="rounded-full px-3 py-1.5 text-sm font-medium {type === 'income' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted text-muted-foreground'}">{t('transactions.income_tab')}</a>
         </div>
@@ -112,7 +154,7 @@
     </form>
 
     {#if transactions.length > 0}
-        <div class="rounded-xl border border-hairline bg-card dark:bg-card">
+        <div class="animate-fade-in-up rounded-xl border border-hairline bg-card dark:bg-card">
             <div class="flex items-center justify-between border-b border-hairline p-3 sm:p-4">
                 <h3 class="text-sm font-semibold sm:text-base">{t('transactions.recent')}</h3>
             </div>
@@ -140,8 +182,19 @@
             </div>
         </div>
     {:else}
-        <div class="rounded-xl border border-dashed border-hairline p-8 text-center sm:p-12">
+        <div class="animate-fade-in-up rounded-xl border border-dashed border-hairline p-8 text-center sm:p-12">
             <p class="text-xs text-muted-foreground sm:text-sm">{t('transactions.empty')}</p>
         </div>
     {/if}
 </div>
+</PullToRefresh>
+
+<ConfirmDialog
+    open={showConfirmDelete}
+    onOpenChange={(v) => showConfirmDelete = v}
+    title={t('transactions.delete_confirm')}
+    description={deleteTarget?.description ?? ''}
+    onConfirm={confirmDelete}
+    confirmText={t('common.delete')}
+    cancelText={t('common.cancel')}
+/>

@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
-use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
@@ -22,7 +20,9 @@ class CategoryController extends Controller
 
         return Redirect::back()->with('toast', [
             'type' => 'success',
-            'message' => __('Category added successfully.'),
+            'message' => app()->getLocale() === 'en'
+                ? 'Category added successfully.'
+                : 'تمت إضافة الفئة بنجاح.',
         ]);
     }
 }

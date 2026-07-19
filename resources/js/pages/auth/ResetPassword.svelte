@@ -34,6 +34,7 @@
     {...update.form()}
     transform={(data) => ({ ...data, token, email })}
     resetOnSuccess={['password', 'password_confirmation']}
+    class="animate-fade-in-up"
 >
     {#snippet children({ errors, processing })}
         <div class="grid gap-6">

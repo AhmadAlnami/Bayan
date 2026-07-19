@@ -22,7 +22,7 @@
 
 <h1 class="sr-only">{t('appearance.title')}</h1>
 
-<div class="space-y-6">
+<div class="animate-fade-in-up space-y-6">
     <Heading
         variant="small"
         title={t('appearance.title')}

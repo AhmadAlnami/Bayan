@@ -51,7 +51,7 @@
         </div>
     </nav>
 
-    <section class="bg-brand-teal-deep px-8 py-20 md:py-28 lg:py-32">
+    <section class="animate-fade-in bg-brand-teal-deep px-8 py-20 md:py-28 lg:py-32">
         <div class="mx-auto max-w-[1280px] text-center">
             <h1 class="mb-4 text-4xl font-medium leading-tight tracking-tight text-on-dark md:text-5xl lg:text-6xl">
                 {t('welcome.headline')}
@@ -93,7 +93,7 @@
                 {t('features.title')}
             </h2>
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                <div class="rounded-xl border border-hairline bg-white p-6 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-1 rounded-xl border border-hairline bg-white p-6 dark:bg-card">
                     <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-green-soft">
                         <Wallet class="size-6 text-brand-green-dark" />
                     </div>
@@ -103,7 +103,7 @@
                     </p>
                 </div>
 
-                <div class="rounded-xl border border-hairline bg-white p-6 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-2 rounded-xl border border-hairline bg-white p-6 dark:bg-card">
                     <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent-blue/10">
                         <BarChart3 class="size-6 text-accent-blue" />
                     </div>
@@ -113,7 +113,7 @@
                     </p>
                 </div>
 
-                <div class="rounded-xl border border-hairline bg-white p-6 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-3 rounded-xl border border-hairline bg-white p-6 dark:bg-card">
                     <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-accent-purple/10">
                         <MessageCircle class="size-6 text-accent-purple" />
                     </div>
@@ -123,7 +123,7 @@
                     </p>
                 </div>
 
-                <div class="rounded-xl border border-hairline bg-white p-6 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-4 rounded-xl border border-hairline bg-white p-6 dark:bg-card">
                     <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-green-soft">
                         <Shield class="size-6 text-brand-green-dark" />
                     </div>
@@ -136,7 +136,7 @@
         </div>
     </section>
 
-    <section class="bg-surface px-8 py-16 md:py-24 dark:bg-accent">
+    <section class="animate-fade-in-up bg-surface px-8 py-16 md:py-24 dark:bg-accent">
         <div class="mx-auto max-w-[1280px] text-center">
             <h2 class="mb-4 text-3xl font-medium text-ink dark:text-accent-foreground md:text-4xl">
                 {t('welcome.ready')}

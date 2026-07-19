@@ -9,6 +9,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -38,9 +39,10 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        Inertia::flash('toast', ['type' => 'success', 'message' => __('Profile updated.')]);
-
-        return to_route('profile.edit');
+        return Redirect::route('profile.edit')->with('toast', [
+            'type' => 'success',
+            'message' => app()->getLocale() === 'en' ? 'Profile updated.' : 'تم تحديث الملف الشخصي بنجاح.',
+        ]);
     }
 
     /**

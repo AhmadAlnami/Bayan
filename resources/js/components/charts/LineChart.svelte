@@ -10,6 +10,9 @@
         Legend,
         Filler,
     } from 'chart.js';
+    import { t, localeState } from '@/lib/locale.svelte';
+
+    const { locale } = localeState();
 
     ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend, Filler);
 
@@ -17,13 +20,15 @@
         labels = [] as string[],
         expenseValues = [] as number[],
         incomeValues = [] as number[],
+        expenseLabel = 'مصروفات',
+        incomeLabel = 'دخل',
     } = $props();
 
     const data = $derived({
         labels,
         datasets: [
             {
-                label: 'دخل',
+                label: incomeLabel,
                 data: incomeValues,
                 borderColor: '#00ed64',
                 backgroundColor: '#00ed6420',
@@ -34,7 +39,7 @@
                 order: 2,
             },
             {
-                label: 'مصروفات',
+                label: expenseLabel,
                 data: expenseValues,
                 borderColor: '#e04444',
                 backgroundColor: '#e0444420',
@@ -65,7 +70,10 @@
             },
             tooltip: {
                 callbacks: {
-                    label: (ctx: any) => `${ctx.dataset.label}: ${ctx.raw.toLocaleString('ar-SA')} ر.س`,
+                    label: (ctx: any) => {
+                        const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+                        return `${ctx.dataset.label}: ${ctx.raw.toLocaleString(numLocale)} ${t('common.sar')}`;
+                    },
                 },
             },
         },
@@ -91,7 +99,7 @@
         <Line {data} {options} />
     {:else}
         <div class="flex size-full items-center justify-center">
-            <p class="text-sm text-muted-foreground">لا توجد بيانات كافية</p>
+            <p class="text-sm text-muted-foreground">{t('dashboard.no_chart_data')}</p>
         </div>
     {/if}
 </div>

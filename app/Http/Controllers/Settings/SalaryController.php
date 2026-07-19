@@ -55,7 +55,9 @@ class SalaryController extends Controller
 
         return Redirect::back()->with('toast', [
             'type' => 'success',
-            'message' => 'تم حفظ إعدادات الراتب بنجاح.',
+            'message' => app()->getLocale() === 'en'
+                ? 'Salary settings saved.'
+                : 'تم حفظ إعدادات الراتب بنجاح.',
         ]);
     }
 }

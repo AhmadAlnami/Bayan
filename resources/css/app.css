@@ -193,3 +193,70 @@
         @apply bg-background text-foreground;
     }
 }
+
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slide-in-right {
+    from {
+        opacity: 0;
+        transform: translateX(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@utility animate-fade-in {
+    animation: fade-in 0.25s ease-out both;
+}
+
+@utility animate-fade-in-up {
+    animation: fade-in-up 0.3s ease-out both;
+}
+
+@utility animate-slide-in {
+    animation: slide-in-right 0.25s ease-out both;
+}
+
+@utility animate-stagger-1 { animation-delay: 0.05s; }
+@utility animate-stagger-2 { animation-delay: 0.1s; }
+@utility animate-stagger-3 { animation-delay: 0.15s; }
+@utility animate-stagger-4 { animation-delay: 0.2s; }
+@utility animate-stagger-5 { animation-delay: 0.25s; }
+
+@keyframes slide-out-left {
+    to {
+        opacity: 0;
+        transform: translateX(-30%);
+    }
+}
+
+@keyframes slide-out-right {
+    to {
+        opacity: 0;
+        transform: translateX(30%);
+    }
+}
+
+@utility animate-slide-out-left {
+    animation: slide-out-left 0.25s ease-in forwards;
+}
+
+@utility animate-slide-out-right {
+    animation: slide-out-right 0.25s ease-in forwards;
+}

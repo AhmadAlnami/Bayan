@@ -33,7 +33,7 @@
     </div>
 {/if}
 
-<div class="space-y-6">
+<div class="animate-fade-in-up space-y-6">
     <Form {...email.form()}>
         {#snippet children({ errors, processing })}
             <div class="grid gap-2">

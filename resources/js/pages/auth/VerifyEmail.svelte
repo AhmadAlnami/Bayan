@@ -30,7 +30,7 @@
     </div>
 {/if}
 
-<Form {...send.form()} class="space-y-6 text-center">
+<Form {...send.form()} class="animate-fade-in-up space-y-6 text-center">
     {#snippet children({ processing })}
         <Button type="submit" disabled={processing} variant="secondary">
             {#if processing}<Spinner />{/if}

@@ -8,6 +8,9 @@
         Tooltip,
         Filler,
     } from 'chart.js';
+    import { t, localeState } from '@/lib/locale.svelte';
+
+    const { locale } = localeState();
 
     ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Filler);
 
@@ -37,7 +40,10 @@
             legend: { display: false },
             tooltip: {
                 callbacks: {
-                    label: (ctx: any) => `${ctx.raw.toLocaleString('ar-SA')} ر.س`,
+                    label: (ctx: any) => {
+                        const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+                        return `${ctx.raw.toLocaleString(numLocale)} ${t('common.sar')}`;
+                    },
                 },
             },
         },
@@ -65,6 +71,6 @@
     {#if values.length > 0}
         <Bar {data} {options} />
     {:else}
-        <p class="py-8 text-center text-sm text-muted-foreground">لا توجد بيانات كافية</p>
+        <p class="py-8 text-center text-sm text-muted-foreground">{t('dashboard.no_chart_data')}</p>
     {/if}
 </div>

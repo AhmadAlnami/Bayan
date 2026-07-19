@@ -34,7 +34,7 @@
     separator={t('auth.or')}
 />
 
-<Form {...store.form()} resetOnSuccess>
+<Form {...store.form()} resetOnSuccess class="animate-fade-in-up">
     {#snippet children({ errors, processing })}
         <div class="space-y-6">
             <div class="grid gap-2">

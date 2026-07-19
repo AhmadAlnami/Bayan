@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\InsightsService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -115,6 +116,7 @@ class DashboardController extends Controller
             'monthlyChart' => $monthlyChart,
             'dailyChart' => $dailyChart,
             'recentTransactions' => $recentTransactions->values(),
+            'insights' => (new InsightsService)->calculate($user),
         ]);
     }
 }

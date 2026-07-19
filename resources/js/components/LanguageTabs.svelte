@@ -1,7 +1,7 @@
 <script lang="ts">
+    import { router } from '@inertiajs/svelte';
     import Languages from 'lucide-svelte/icons/languages';
     import { localeState, updateLocale, type Locale } from '@/lib/locale.svelte';
-    import LanguageController from '@/actions/App/Http/Controllers/Settings/LanguageController';
 
     let { currentLocale = 'ar' }: { currentLocale?: Locale } = $props();
 
@@ -26,9 +26,7 @@
 
     function handleLocaleChange(value: Locale) {
         updateLocale(value);
-        LanguageController.update.form().submit({
-            locale: value,
-        });
+        router.patch('/settings/language', { locale: value });
     }
 </script>
 

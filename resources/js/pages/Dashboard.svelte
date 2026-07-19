@@ -21,7 +21,10 @@
     import PieChart from '@/components/charts/PieChart.svelte';
     import BarChart from '@/components/charts/BarChart.svelte';
     import LineChart from '@/components/charts/LineChart.svelte';
-    import { t, localizedName } from '@/lib/locale.svelte';
+    import PullToRefresh from '@/components/PullToRefresh.svelte';
+    import { t, localizedName, localeState } from '@/lib/locale.svelte';
+
+    const { locale } = localeState();
 
     let {
         stats = { total_expenses: 0, total_income: 0, balance: 0, transaction_count: 0, this_month_expenses: 0, this_month_income: 0 },
@@ -29,6 +32,7 @@
         monthlyChart = [] as { month: string; expenses: number; income: number }[],
         dailyChart = [] as { day: string; total: number }[],
         recentTransactions = [] as any[],
+        insights = null as any,
     } = $props();
 
     let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
@@ -41,9 +45,12 @@
     function quickAdd() {
         if (!quickText.trim()) return;
         quickLoading = true;
-        router.post('/transactions/quick', { text: quickText, type: quickType }, {
+        const desc = quickText;
+        quickText = '';
+
+        router.post('/transactions/quick', { text: desc, type: quickType }, {
             preserveScroll: true,
-            onFinish: () => { quickLoading = false; quickText = ''; },
+            onFinish: () => { quickLoading = false; },
         });
     }
 
@@ -55,7 +62,8 @@
     }
 
     function formatAmount(amount: number): string {
-        return new Intl.NumberFormat('ar-SA').format(amount) + ' ' + t('common.sar');
+        const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+        return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 
     const pieLabels = $derived(categoryBreakdown.map(c => localizedName(c)));
@@ -70,8 +78,9 @@
 
 <AppHead title={t('dashboard.title')} />
 
-<div class="min-w-0 space-y-4 p-4 sm:space-y-6 sm:p-6">
-    <div>
+<PullToRefresh>
+    <div class="min-w-0 space-y-4 p-4 sm:space-y-6 sm:p-6">
+        <div>
         <h1 class="text-xl font-semibold sm:text-2xl">{t('dashboard.title')}</h1>
         <p class="text-sm text-muted-foreground">{t('dashboard.welcome')}</p>
     </div>
@@ -108,7 +117,7 @@
     </div>
 
     <div class="grid gap-3 sm:gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card">
+        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card animate-fade-in-up animate-stagger-1">
             <div class="flex items-center gap-3">
                 <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-destructive/10">
                     <TrendingDown class="size-4 text-destructive" />
@@ -119,7 +128,7 @@
                 </div>
             </div>
         </div>
-        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card">
+        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card animate-fade-in-up animate-stagger-3">
             <div class="flex items-center gap-3">
                 <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-green-soft dark:bg-brand-green/10">
                     <TrendingUp class="size-4 text-brand-green-dark dark:text-brand-green" />
@@ -130,7 +139,7 @@
                 </div>
             </div>
         </div>
-        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card">
+        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card animate-fade-in-up animate-stagger-4">
             <div class="flex items-center gap-3">
                 <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-blue/10">
                     <Wallet class="size-4 text-accent-blue" />
@@ -141,35 +150,65 @@
                 </div>
             </div>
         </div>
-        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card">
+        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card animate-fade-in-up animate-stagger-5">
             <div class="flex items-center gap-3">
                 <div class="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-orange/10">
                     <Calendar class="size-4 text-accent-orange" />
                 </div>
                 <div class="min-w-0">
                     <p class="text-xs text-muted-foreground sm:text-sm">{t('dashboard.transactions_count')}</p>
-                    <p class="text-base font-bold sm:text-xl">{stats.transaction_count}</p>
+                    <p class="text-base font-bold sm:text-xl">{new Intl.NumberFormat(locale.value === 'ar' ? 'ar-SA' : 'en-US').format(stats.transaction_count)}</p>
                 </div>
             </div>
         </div>
     </div>
 
+    {#if insights}
+        <div class="grid gap-3 sm:grid-cols-3">
+            <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card animate-fade-in-up">
+                <p class="text-xs text-muted-foreground">{t('insights.monthCompare')}</p>
+                <p class="text-lg font-bold {insights.monthComparison.expenseChange > 0 ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
+                    {insights.monthComparison.expenseChange > 0 ? '+' : ''}{insights.monthComparison.expenseChange}%
+                </p>
+                <p class="text-[10px] text-muted-foreground">{insights.monthComparison.expenseChange > 0 ? t('insights.dashboardExpenses') : t('insights.dashboardExpensesDown')}</p>
+            </div>
+            <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card animate-fade-in-up animate-stagger-1">
+                <p class="text-xs text-muted-foreground">{t('insights.dashboardPace')}</p>
+                <p class="text-lg font-bold {insights.spendingPace.status === 'fast' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
+                    {insights.spendingPace.pctSpent}%
+                </p>
+                <p class="text-[10px] text-muted-foreground">{t('insights.dashboardPaceDesc')}</p>
+            </div>
+            <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card animate-fade-in-up animate-stagger-2">
+                <p class="text-xs text-muted-foreground">{t('insights.savingsRate')}</p>
+                <p class="text-lg font-bold text-brand-green-dark dark:text-brand-green">{insights.savingsRate.rate}%</p>
+                <p class="text-[10px] text-muted-foreground">{formatAmount(insights.savingsRate.saved)} {t('insights.dashboardSavings')}</p>
+            </div>
+        </div>
+    {/if}
+
     <div class="rounded-xl border border-hairline bg-card p-3 sm:p-6 dark:bg-card">
-        <h3 class="mb-2 text-sm font-semibold sm:mb-3 sm:text-base">اتجاهات الدخل والمصروفات</h3>
+        <h3 class="mb-2 text-sm font-semibold sm:mb-3 sm:text-base">{t('dashboard.trends')}</h3>
         <div class="h-56 sm:h-64">
-            <LineChart labels={lineLabels} expenseValues={lineExpenses} incomeValues={lineIncome} />
+            <LineChart
+                labels={lineLabels}
+                expenseValues={lineExpenses}
+                incomeValues={lineIncome}
+                expenseLabel={t('dashboard.legend_expenses')}
+                incomeLabel={t('dashboard.legend_income')}
+            />
         </div>
     </div>
 
     <div class="grid gap-3 sm:gap-6 lg:grid-cols-2">
         <div class="rounded-xl border border-hairline bg-card p-3 sm:p-6 dark:bg-card">
-            <h3 class="mb-2 text-sm font-semibold sm:mb-3 sm:text-base">مصروفات اليومية</h3>
+            <h3 class="mb-2 text-sm font-semibold sm:mb-3 sm:text-base">{t('dashboard.daily')}</h3>
             <div class="h-48 sm:h-56">
                 <BarChart labels={barLabels} values={barValues} color="#e04444" />
             </div>
         </div>
         <div class="rounded-xl border border-hairline bg-card p-3 sm:p-6 dark:bg-card">
-            <h3 class="mb-2 text-sm font-semibold sm:mb-3 sm:text-base">توزيع المصروفات</h3>
+            <h3 class="mb-2 text-sm font-semibold sm:mb-3 sm:text-base">{t('dashboard.breakdown')}</h3>
             <div class="mx-auto h-48 w-full max-w-[200px] sm:h-56 sm:max-w-[260px]">
                 <PieChart labels={pieLabels} values={pieValues} colors={pieColors} />
             </div>
@@ -251,3 +290,4 @@
         </div>
     {/if}
 </div>
+</PullToRefresh>

@@ -48,7 +48,7 @@
 
 <AppHead title={t('auth.two_factor')} />
 
-<div class="space-y-6">
+<div class="animate-fade-in-up space-y-6">
     {#if !showRecoveryInput}
         <Form
             {...store.form()}

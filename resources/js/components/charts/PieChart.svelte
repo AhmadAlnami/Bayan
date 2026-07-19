@@ -6,6 +6,9 @@
         Tooltip,
         Legend,
     } from 'chart.js';
+    import { t, localeState } from '@/lib/locale.svelte';
+
+    const { locale } = localeState();
 
     ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -43,7 +46,8 @@
                     label: (ctx: any) => {
                         const total = ctx.dataset.data.reduce((a: number, b: number) => a + b, 0);
                         const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : '0';
-                        return `${ctx.label}: ${ctx.raw.toLocaleString('ar-SA')} ر.س (${pct}%)`;
+                        const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+                        return `${ctx.label}: ${ctx.raw.toLocaleString(numLocale)} ${t('common.sar')} (${pct}%)`;
                     },
                 },
             },
@@ -55,6 +59,6 @@
     {#if values.length > 0}
         <Pie {data} {options} />
     {:else}
-        <p class="py-8 text-center text-sm text-muted-foreground">لا توجد بيانات كافية</p>
+        <p class="py-8 text-center text-sm text-muted-foreground">{t('dashboard.no_chart_data')}</p>
     {/if}
 </div>

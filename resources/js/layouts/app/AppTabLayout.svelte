@@ -17,7 +17,7 @@
 
 <AppShell variant="header">
     <TopNav {breadcrumbs} />
-    <main class="flex-1 pb-16 md:pb-0">
+    <main class="flex-1 pb-16 animate-fade-in md:pb-0">
         {@render children?.()}
     </main>
     <BottomNav />
