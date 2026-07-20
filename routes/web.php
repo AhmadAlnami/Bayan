@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InsightsController;
 use App\Http\Controllers\ReportsController;
+use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,6 +37,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('reports', [ReportsController::class, 'index'])->name('reports');
     Route::get('reports/print', [ReportsController::class, 'print'])->name('reports.print');
+
+    Route::get('savings', [SavingsController::class, 'index'])->name('savings');
+    Route::post('savings', [SavingsController::class, 'store'])->name('savings.store');
+    Route::patch('savings/{savingsGoal}', [SavingsController::class, 'update'])->name('savings.update');
+    Route::delete('savings/{savingsGoal}', [SavingsController::class, 'destroy'])->name('savings.destroy');
+    Route::post('savings/{savingsGoal}/deposit', [SavingsController::class, 'deposit'])->name('savings.deposit');
 });
 
 require __DIR__.'/settings.php';

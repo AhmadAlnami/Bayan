@@ -1,11 +1,13 @@
 <?php
 
+use App\Console\Commands\ProcessAutoSaves;
 use App\Console\Commands\ProcessSalaryDeposits;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command(ProcessSalaryDeposits::class)->dailyAt('00:00');
+Schedule::command(ProcessAutoSaves::class)->dailyAt('00:30');
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());

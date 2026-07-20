@@ -40,6 +40,10 @@
             href: '/settings/salary',
         },
         {
+            title: () => t('savings.title'),
+            href: '/savings',
+        },
+        {
             title: () => t('reports.title'),
             href: '/reports',
         },

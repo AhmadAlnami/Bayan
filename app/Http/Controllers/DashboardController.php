@@ -182,6 +182,20 @@ class DashboardController extends Controller
             'trend_pct' => abs($trendPct),
         ];
 
+        $savingsGoals = $user->savingsGoals()
+            ->orderByDesc('created_at')
+            ->limit(4)
+            ->get()
+            ->map(fn ($g) => [
+                'id' => $g->id,
+                'name' => $g->name,
+                'name_en' => $g->name_en,
+                'target_amount' => (float) $g->target_amount,
+                'current_amount' => (float) $g->current_amount,
+                'progress' => $g->progress,
+                'remaining' => $g->remaining,
+            ]);
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'total_expenses' => $user->transactions()->where('type', 'expense')->sum('amount'),
@@ -199,6 +213,7 @@ class DashboardController extends Controller
             'budgets' => $budgets,
             'budget_warnings' => $budgetWarnings,
             'summary' => $summary,
+            'savings_goals' => $savingsGoals,
         ]);
     }
 

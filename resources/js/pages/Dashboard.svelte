@@ -39,6 +39,7 @@
         budgets = [] as any[],
         budget_warnings = [] as { type: string; type_label: string; spent: number; amount: number; progress: number }[],
         summary = null as { today_expenses: number; today_count: number; week_expenses: number; week_count: number; avg_daily_this_month: number; trend_label: string; trend_pct: number } | null,
+        savings_goals = [] as { id: number; name: string; name_en: string; target_amount: number; current_amount: number; progress: number; remaining: number }[],
     } = $props();
 
     let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
@@ -293,6 +294,28 @@
                     </p>
                     <p class="text-[10px] text-muted-foreground">{t('dashboard.summary_vs_last')}</p>
                 </div>
+            </div>
+        </div>
+    {/if}
+
+    {#if savings_goals.length > 0}
+        <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold">{t('savings.title')}</h3>
+                <a href="/savings" class="text-xs text-brand-green-dark dark:text-brand-green font-medium">{t('savings.add_goal')} &rarr;</a>
+            </div>
+            <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+                {#each savings_goals as goal}
+                    <a href="/savings" class="rounded-lg border border-hairline bg-muted/30 p-2 hover:bg-muted/50 transition-colors">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium">{locale.value === 'ar' ? goal.name : goal.name_en}</span>
+                            <span class="text-muted-foreground">{goal.progress}%</span>
+                        </div>
+                        <div class="h-1.5 w-full rounded-full bg-muted">
+                            <div class="h-1.5 rounded-full {goal.progress >= 100 ? 'bg-brand-green' : 'bg-accent-blue'}" style="width: {goal.progress}%"></div>
+                        </div>
+                    </a>
+                {/each}
             </div>
         </div>
     {/if}

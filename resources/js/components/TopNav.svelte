@@ -9,6 +9,7 @@
     import Moon from 'lucide-svelte/icons/moon';
     import LogOut from 'lucide-svelte/icons/log-out';
     import FileText from 'lucide-svelte/icons/file-text';
+    import PiggyBank from 'lucide-svelte/icons/piggy-bank';
     import Settings from 'lucide-svelte/icons/settings';
     import Banknote from 'lucide-svelte/icons/banknote';
     import AppLogo from '@/components/AppLogo.svelte';
@@ -90,6 +91,10 @@
                         <Banknote class="size-4 mr-2" />
                         {t('settings.salary')}
                     </DropdownMenuItem>
+                    <DropdownMenuItem onclick={() => router.visit('/savings')}>
+                        <PiggyBank class="size-4 mr-2" />
+                        {t('savings.title')}
+                    </DropdownMenuItem>
                     <DropdownMenuItem onclick={() => router.visit('/reports')}>
                         <FileText class="size-4 mr-2" />
                         {t('reports.title')}
@@ -133,6 +138,10 @@
                     <DropdownMenuItem onclick={() => visitSettings('/settings/salary')}>
                         <Banknote class="size-4 mr-2" />
                         {t('settings.salary')}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onclick={() => router.visit('/savings')}>
+                        <PiggyBank class="size-4 mr-2" />
+                        {t('savings.title')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onclick={() => router.visit('/reports')}>
                         <FileText class="size-4 mr-2" />

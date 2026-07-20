@@ -3,6 +3,7 @@
     import LogOut from 'lucide-svelte/icons/log-out';
     import Settings from 'lucide-svelte/icons/settings';
     import FileText from 'lucide-svelte/icons/file-text';
+    import PiggyBank from 'lucide-svelte/icons/piggy-bank';
     import {
         DropdownMenuGroup,
         DropdownMenuItem,
@@ -59,6 +60,19 @@
             >
                 <FileText class="mr-2 h-4 w-4" />
                 Reports
+            </Link>
+        {/snippet}
+    </DropdownMenuItem>
+    <DropdownMenuItem asChild>
+        {#snippet children(props)}
+            <Link
+                class={props.class}
+                href="/savings"
+                prefetch
+                onclick={props.onClick}
+            >
+                <PiggyBank class="mr-2 h-4 w-4" />
+                Savings
             </Link>
         {/snippet}
     </DropdownMenuItem>
