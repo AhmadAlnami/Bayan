@@ -60,7 +60,7 @@ class TransactionController extends Controller
     public function quickStore(Request $request): RedirectResponse
     {
         $request->validate([
-            'text' => 'required|string|min:2',
+            'text' => 'required|string|min:1',
             'type' => 'required|in:expense,income',
         ]);
 
@@ -68,7 +68,7 @@ class TransactionController extends Controller
         $amount = 0;
         $description = '';
 
-        if (preg_match('/^(\d+(?:\.\d+)?)\s*(.+)$/u', $text, $matches)) {
+        if (preg_match('/^(\d+(?:\.\d+)?)\s*(.*)$/u', $text, $matches)) {
             $amount = (float) $matches[1];
             $description = trim($matches[2]);
         } else {
