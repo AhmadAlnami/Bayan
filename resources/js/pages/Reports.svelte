@@ -186,7 +186,7 @@
         {:else}
             <div>
                 <div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                    <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
+                    <div class="animate-fade-in-up animate-stagger-1 rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
                         <div class="flex items-center gap-2 text-xs text-muted-foreground">
                             <TrendingUp class="size-3.5 text-destructive" />
                             <span>{t('reports.total_expenses')}</span>
@@ -194,7 +194,7 @@
                         <p class="mt-1 text-lg font-bold">{formatAmount(report.totals.expenses)}</p>
                     </div>
 
-                    <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
+                    <div class="animate-fade-in-up animate-stagger-2 rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
                         <div class="flex items-center gap-2 text-xs text-muted-foreground">
                             <TrendingDown class="size-3.5 text-brand-green-dark dark:text-brand-green" />
                             <span>{t('reports.total_income')}</span>
@@ -202,7 +202,7 @@
                         <p class="mt-1 text-lg font-bold">{formatAmount(report.totals.income)}</p>
                     </div>
 
-                    <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
+                    <div class="animate-fade-in-up animate-stagger-3 rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
                         <div class="flex items-center gap-2 text-xs text-muted-foreground">
                             <PiggyBank class="size-3.5 text-accent-blue" />
                             <span>{t('reports.net')}</span>
@@ -212,7 +212,7 @@
                         </p>
                     </div>
 
-                    <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
+                    <div class="animate-fade-in-up animate-stagger-4 rounded-xl border border-hairline bg-card p-3 dark:bg-card sm:p-4">
                         <div class="flex items-center gap-2 text-xs text-muted-foreground">
                             <DollarSign class="size-3.5 text-accent-purple" />
                             <span>{t('reports.transactions_count')}</span>

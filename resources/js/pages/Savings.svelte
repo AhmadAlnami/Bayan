@@ -157,19 +157,19 @@
 
         {#if goals.length > 0}
             <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-1 rounded-xl border border-hairline bg-card p-3 dark:bg-card">
                     <p class="text-xs text-muted-foreground">{t('savings.total_saved')}</p>
                     <p class="mt-1 text-lg font-bold text-brand-green-dark dark:text-brand-green">{formatAmount(totalSaved)}</p>
                 </div>
-                <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-2 rounded-xl border border-hairline bg-card p-3 dark:bg-card">
                     <p class="text-xs text-muted-foreground">{t('savings.total_target')}</p>
                     <p class="mt-1 text-lg font-bold">{formatAmount(totalTarget)}</p>
                 </div>
-                <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-3 rounded-xl border border-hairline bg-card p-3 dark:bg-card">
                     <p class="text-xs text-muted-foreground">{t('savings.goals_count')}</p>
                     <p class="mt-1 text-lg font-bold">{goals.length}</p>
                 </div>
-                <div class="rounded-xl border border-hairline bg-card p-3 dark:bg-card">
+                <div class="animate-fade-in-up animate-stagger-4 rounded-xl border border-hairline bg-card p-3 dark:bg-card">
                     <p class="text-xs text-muted-foreground">{t('savings.overall_progress')}</p>
                     <p class="mt-1 text-lg font-bold text-accent-blue">{totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0}%</p>
                 </div>
