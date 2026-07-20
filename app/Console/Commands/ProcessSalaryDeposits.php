@@ -26,6 +26,7 @@ class ProcessSalaryDeposits extends Command
 
         if ($settings->isEmpty()) {
             $this->info('No salary deposits to process today.');
+
             return;
         }
 

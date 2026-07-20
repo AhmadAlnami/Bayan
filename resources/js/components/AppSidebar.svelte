@@ -5,6 +5,7 @@
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
     import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
+    import FileText from 'lucide-svelte/icons/file-text';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
@@ -44,6 +45,11 @@
             title: 'الدخل',
             href: '/transactions/income',
             icon: ArrowDownLeft,
+        },
+        {
+            title: 'التقارير',
+            href: '/reports',
+            icon: FileText,
         },
     ];
 

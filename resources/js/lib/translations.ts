@@ -222,6 +222,20 @@ const ar: TranslationKeys = {
     'delete.cancel': 'إلغاء',
     'delete.password_label': 'كلمة المرور',
     'delete.password_placeholder': 'كلمة المرور للتأكيد',
+    'reports.title': 'التقارير',
+    'reports.daily': 'يومي',
+    'reports.weekly': 'أسبوعي',
+    'reports.monthly': 'شهري',
+    'reports.yearly': 'سنوي',
+    'reports.total_expenses': 'إجمالي المصروفات',
+    'reports.total_income': 'إجمالي الدخل',
+    'reports.net': 'الصافي',
+    'reports.transactions_count': 'عدد المعاملات',
+    'reports.comparison': 'مقارنة بالفترة السابقة',
+    'reports.top_expenses': 'أعلى المصروفات',
+    'reports.category_breakdown': 'توزيع المصروفات',
+    'reports.empty': 'لا توجد معاملات في هذه الفترة',
+    'reports.export_pdf': 'تصدير PDF',
 };
 
 const en: TranslationKeys = {
@@ -442,6 +456,20 @@ const en: TranslationKeys = {
     'delete.cancel': 'Cancel',
     'delete.password_label': 'Password',
     'delete.password_placeholder': 'Password to confirm',
+    'reports.title': 'Reports',
+    'reports.daily': 'Daily',
+    'reports.weekly': 'Weekly',
+    'reports.monthly': 'Monthly',
+    'reports.yearly': 'Yearly',
+    'reports.total_expenses': 'Total Expenses',
+    'reports.total_income': 'Total Income',
+    'reports.net': 'Net',
+    'reports.transactions_count': 'Transactions',
+    'reports.comparison': 'vs Previous Period',
+    'reports.top_expenses': 'Top Expenses',
+    'reports.category_breakdown': 'Expense Breakdown',
+    'reports.empty': 'No transactions in this period',
+    'reports.export_pdf': 'Export PDF',
 };
 
 export const translations = { ar, en };

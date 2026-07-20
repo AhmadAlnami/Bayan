@@ -39,6 +39,10 @@
             title: () => t('settings.salary'),
             href: '/settings/salary',
         },
+        {
+            title: () => t('reports.title'),
+            href: '/reports',
+        },
     ];
 
     const url = currentUrlState();

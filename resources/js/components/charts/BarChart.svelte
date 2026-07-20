@@ -19,52 +19,69 @@
         values = [] as number[],
         label = '',
         color = '#00ed64',
+        values2 = [] as number[],
+        label2 = '',
+        color2 = '',
     } = $props();
+
+    const hasDual = $derived(values2.length > 0 && color2 !== '');
 
     const data = $derived({
         labels,
-        datasets: [{
-            label,
-            data: values,
-            backgroundColor: color + '80',
-            borderColor: color,
-            borderWidth: 1,
-            borderRadius: 3,
-        }],
+        datasets: [
+            {
+                label,
+                data: values,
+                backgroundColor: color + '80',
+                borderColor: color,
+                borderWidth: 1,
+                borderRadius: 3,
+            },
+            ...(hasDual ? [{
+                label: label2,
+                data: values2,
+                backgroundColor: color2 + '80',
+                borderColor: color2,
+                borderWidth: 1,
+                borderRadius: 3,
+            }] : []),
+        ],
     });
 
-    const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                callbacks: {
-                    label: (ctx: any) => {
-                        const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
-                        return `${ctx.raw.toLocaleString(numLocale)} ${t('common.sar')}`;
+    let options = $derived.by(() => {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: hasDual, position: 'bottom' as const },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx: any) => {
+                            const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+                            return `${ctx.dataset.label ? ctx.dataset.label + ': ' : ''}${ctx.raw.toLocaleString(numLocale)} ${t('common.sar')}`;
+                        },
                     },
                 },
             },
-        },
-        scales: {
-            x: {
-                grid: { display: false },
-                ticks: {
-                    font: { size: 9 },
-                    maxTicksLimit: 15,
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        font: { size: 9 },
+                        maxTicksLimit: 15,
+                    },
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#e8edeb' },
+                    ticks: {
+                        font: { size: 10 },
+                        callback: (v: any) => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v,
+                    },
                 },
             },
-            y: {
-                beginAtZero: true,
-                grid: { color: '#e8edeb' },
-                ticks: {
-                    font: { size: 10 },
-                    callback: (v: any) => v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v,
-                },
-            },
-        },
-    };
+        };
+    });
 </script>
 
 <div class="h-full w-full min-w-0 max-w-full overflow-hidden">

@@ -2,6 +2,7 @@
     import { Link, router } from '@inertiajs/svelte';
     import LogOut from 'lucide-svelte/icons/log-out';
     import Settings from 'lucide-svelte/icons/settings';
+    import FileText from 'lucide-svelte/icons/file-text';
     import {
         DropdownMenuGroup,
         DropdownMenuItem,
@@ -45,6 +46,19 @@
             >
                 <Settings class="mr-2 h-4 w-4" />
                 Settings
+            </Link>
+        {/snippet}
+    </DropdownMenuItem>
+    <DropdownMenuItem asChild>
+        {#snippet children(props)}
+            <Link
+                class={props.class}
+                href="/reports"
+                prefetch
+                onclick={props.onClick}
+            >
+                <FileText class="mr-2 h-4 w-4" />
+                Reports
             </Link>
         {/snippet}
     </DropdownMenuItem>
