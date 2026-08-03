@@ -11,16 +11,25 @@
     import AppHead from '@/components/AppHead.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
+    import { Label } from '@/components/ui/label';
+    import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
     import Wallet from 'lucide-svelte/icons/wallet';
     import Trash2 from 'lucide-svelte/icons/trash-2';
+    import Plus from 'lucide-svelte/icons/plus';
+    import Pencil from 'lucide-svelte/icons/pencil';
+    import Receipt from 'lucide-svelte/icons/receipt';
+    import AlarmClock from 'lucide-svelte/icons/alarm-clock';
+    import Check from 'lucide-svelte/icons/check';
+    import Calendar from 'lucide-svelte/icons/calendar';
     import { t, localizedName, localeState } from '@/lib/locale.svelte';
     import PullToRefresh from '@/components/PullToRefresh.svelte';
+    import ConfirmDialog from '@/components/ConfirmDialog.svelte';
 
     const { locale } = localeState();
 
-    let { budgets = [] as any[], categories = [] as any[] } = $props();
+    let { budgets = [] as any[], categories = [] as any[], bills = [] as any[] } = $props();
 
-    let activeTab = $state<'daily' | 'weekly' | 'monthly' | 'category'>('daily');
+    let activeTab = $state<'daily' | 'weekly' | 'monthly' | 'category' | 'bills'>('daily');
 
     let dailyAmount = $state('');
     let weeklyAmount = $state('');
@@ -29,12 +38,43 @@
     let selectedCategoryId = $state('');
     let saving = $state(false);
 
+    let showBillModal = $state(false);
+    let editingBillId = $state<number | null>(null);
+    let billName = $state('');
+    let billAmount = $state('');
+    let billCategory = $state('');
+    let billDueDay = $state('');
+    let billReminder = $state('3');
+    let billRecurrence = $state('monthly');
+    let billLoading = $state(false);
+
+    let showDeleteConfirm = $state(false);
+    let deleteTarget = $state<{ type: string; id: number } | null>(null);
+
     const tabs = [
         { key: 'daily', title: () => t('budgets.daily') },
         { key: 'weekly', title: () => t('budgets.weekly') },
         { key: 'monthly', title: () => t('budgets.monthly') },
         { key: 'category', title: () => t('budgets.category') },
+        { key: 'bills', title: () => t('bills.title') },
     ];
+
+    const billCategories = [
+        { value: 'كهرباء', label: () => t('bills.electricity') },
+        { value: 'ماء', label: () => t('bills.water') },
+        { value: 'جوال', label: () => t('bills.phone') },
+        { value: 'إنترنت', label: () => t('bills.internet') },
+        { value: 'إيجار', label: () => t('bills.rent') },
+        { value: 'قرض', label: () => t('bills.loan') },
+        { value: 'تأمين', label: () => t('bills.insurance') },
+        { value: 'أخرى', label: () => t('bills.other') },
+    ];
+
+    const recurrenceLabels: Record<string, () => string> = {
+        monthly: () => t('bills.monthly'),
+        weekly: () => t('bills.weekly'),
+        yearly: () => t('bills.yearly'),
+    };
 
     function getBudget(type: string, categoryId: number | null = null) {
         return budgets.find((b: any) => {
@@ -76,17 +116,72 @@
         return 'bg-brand-green';
     }
 
+    function confirmDelete(type: string, id: number) {
+        deleteTarget = { type, id }; showDeleteConfirm = true;
+    }
+
+    function doDelete() {
+        if (!deleteTarget) return;
+        if (deleteTarget.type === 'budget') {
+            router.delete(`/budgets/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => { showDeleteConfirm = false; } });
+        } else if (deleteTarget.type === 'bill') {
+            router.delete(`/bills/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => { showDeleteConfirm = false; } });
+        }
+    }
+
+    function openBillModal(bill: any | null = null) {
+        if (bill) {
+            editingBillId = bill.id;
+            billName = locale.value === 'ar' ? bill.name : bill.name_en;
+            billAmount = String(bill.amount);
+            billCategory = bill.category;
+            billDueDay = String(bill.due_day);
+            billReminder = String(bill.reminder_days);
+            billRecurrence = bill.recurrence;
+        } else {
+            editingBillId = null;
+            billName = ''; billAmount = ''; billCategory = ''; billDueDay = '1';
+            billReminder = '3'; billRecurrence = 'monthly';
+        }
+        showBillModal = true;
+    }
+
+    function saveBill() {
+        billLoading = true;
+        const data: Record<string, any> = {
+            name: billName, amount: parseFloat(billAmount), category: billCategory || 'أخرى',
+            due_day: parseInt(billDueDay), reminder_days: parseInt(billReminder), recurrence: billRecurrence,
+        };
+        if (editingBillId) {
+            router.patch(`/bills/${editingBillId}`, data, {
+                preserveScroll: true, preserveState: true,
+                onFinish: () => { billLoading = false; showBillModal = false; },
+            });
+        } else {
+            router.post('/bills', data, {
+                preserveScroll: true, preserveState: true,
+                onFinish: () => { billLoading = false; showBillModal = false; },
+            });
+        }
+    }
+
+    function payBill(bill: any) {
+        router.post(`/bills/${bill.id}/pay`, {}, { preserveScroll: true, preserveState: true });
+    }
+
+    function getDaysUntilDue(dueDay: number): string {
+        const today = new Date().getDate();
+        if (dueDay === today) return t('bills.due_today');
+        if (dueDay > today) return dueDay - today + ' ' + t('bills.days_left');
+        const dim = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        return (dim - today + dueDay) + ' ' + t('bills.days_left');
+    }
+
     const dailyBudget = $derived(getBudget('daily'));
     const weeklyBudget = $derived(getBudget('weekly'));
     const monthlyBudget = $derived(getBudget('monthly'));
-
-    const categoryBudgets = $derived(
-        budgets.filter((b: any) => b.type === 'category')
-    );
-
-    const unusedCategories = $derived(
-        categories.filter((c: any) => !budgets.some((b: any) => b.type === 'category' && b.category?.id === c.id))
-    );
+    const categoryBudgets = $derived(budgets.filter((b: any) => b.type === 'category'));
+    const unusedCategories = $derived(categories.filter((c: any) => !budgets.some((b: any) => b.type === 'category' && b.category?.id === c.id)));
 </script>
 
 <AppHead title={t('budgets.title')} />
@@ -121,15 +216,11 @@
                             <p class="text-xs text-muted-foreground">{t('budgets.spent')}: {formatAmount(dailyBudget?.spent || 0)}</p>
                         </div>
                     </div>
-
                     {#if dailyBudget}
                         <div class="mb-3 sm:mb-4">
                             <div class="mb-1 flex justify-between text-xs sm:text-sm">
                                 <span>{formatAmount(dailyBudget.spent || 0)} / {formatAmount(dailyBudget.amount)}</span>
-                                <span class="{dailyBudget.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">
-                                    {dailyBudget.progress}%
-                                    {#if dailyBudget.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}
-                                </span>
+                                <span class="{dailyBudget.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">{dailyBudget.progress}%{#if dailyBudget.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}</span>
                             </div>
                             <div class="h-2 w-full rounded-full bg-muted sm:h-2.5">
                                 <div class="h-2 rounded-full transition-all sm:h-2.5 {getProgressColor(dailyBudget.progress)}" style="width: {Math.min(dailyBudget.progress, 100)}%"></div>
@@ -139,7 +230,6 @@
                             <Button variant="ghost" size="icon" class="text-destructive" onclick={() => deleteBudget(dailyBudget)}><Trash2 class="size-4" /></Button>
                         </div>
                     {/if}
-
                     <div class="mt-3 border-t border-hairline pt-3 sm:mt-4 sm:pt-4">
                         <p class="mb-2 text-xs text-muted-foreground sm:text-sm">{dailyBudget ? t('budgets.update_budget') : t('budgets.set_daily')}</p>
                         <form onsubmit={(e) => { e.preventDefault(); saveBudget('daily', dailyAmount); }} class="flex gap-2">
@@ -160,15 +250,11 @@
                             <p class="text-xs text-muted-foreground">{t('budgets.spent')}: {formatAmount(weeklyBudget?.spent || 0)}</p>
                         </div>
                     </div>
-
                     {#if weeklyBudget}
                         <div class="mb-3 sm:mb-4">
                             <div class="mb-1 flex justify-between text-xs sm:text-sm">
                                 <span>{formatAmount(weeklyBudget.spent || 0)} / {formatAmount(weeklyBudget.amount)}</span>
-                                <span class="{weeklyBudget.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">
-                                    {weeklyBudget.progress}%
-                                    {#if weeklyBudget.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}
-                                </span>
+                                <span class="{weeklyBudget.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">{weeklyBudget.progress}%{#if weeklyBudget.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}</span>
                             </div>
                             <div class="h-2 w-full rounded-full bg-muted sm:h-2.5">
                                 <div class="h-2 rounded-full transition-all sm:h-2.5 {getProgressColor(weeklyBudget.progress)}" style="width: {Math.min(weeklyBudget.progress, 100)}%"></div>
@@ -178,7 +264,6 @@
                             <Button variant="ghost" size="icon" class="text-destructive" onclick={() => deleteBudget(weeklyBudget)}><Trash2 class="size-4" /></Button>
                         </div>
                     {/if}
-
                     <div class="mt-3 border-t border-hairline pt-3 sm:mt-4 sm:pt-4">
                         <p class="mb-2 text-xs text-muted-foreground sm:text-sm">{weeklyBudget ? t('budgets.update_budget') : t('budgets.set_weekly')}</p>
                         <form onsubmit={(e) => { e.preventDefault(); saveBudget('weekly', weeklyAmount); }} class="flex gap-2">
@@ -199,15 +284,11 @@
                             <p class="text-xs text-muted-foreground">{t('budgets.spent')}: {formatAmount(monthlyBudget?.spent || 0)}</p>
                         </div>
                     </div>
-
                     {#if monthlyBudget}
                         <div class="mb-3 sm:mb-4">
                             <div class="mb-1 flex justify-between text-xs sm:text-sm">
                                 <span>{formatAmount(monthlyBudget.spent || 0)} / {formatAmount(monthlyBudget.amount)}</span>
-                                <span class="{monthlyBudget.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">
-                                    {monthlyBudget.progress}%
-                                    {#if monthlyBudget.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}
-                                </span>
+                                <span class="{monthlyBudget.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">{monthlyBudget.progress}%{#if monthlyBudget.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}</span>
                             </div>
                             <div class="h-2 w-full rounded-full bg-muted sm:h-2.5">
                                 <div class="h-2 rounded-full transition-all sm:h-2.5 {getProgressColor(monthlyBudget.progress)}" style="width: {Math.min(monthlyBudget.progress, 100)}%"></div>
@@ -217,7 +298,6 @@
                             <Button variant="ghost" size="icon" class="text-destructive" onclick={() => deleteBudget(monthlyBudget)}><Trash2 class="size-4" /></Button>
                         </div>
                     {/if}
-
                     <div class="mt-3 border-t border-hairline pt-3 sm:mt-4 sm:pt-4">
                         <p class="mb-2 text-xs text-muted-foreground sm:text-sm">{monthlyBudget ? t('budgets.update_budget') : t('budgets.set_monthly')}</p>
                         <form onsubmit={(e) => { e.preventDefault(); saveBudget('monthly', monthlyAmount); }} class="flex gap-2">
@@ -240,20 +320,15 @@
                             </div>
                             <Button variant="ghost" size="icon" class="text-destructive" onclick={() => deleteBudget(b)}><Trash2 class="size-4" /></Button>
                         </div>
-
                         <div class="mb-1 flex justify-between text-xs sm:text-sm">
                             <span>{formatAmount(b.spent || 0)} / {formatAmount(b.amount)}</span>
-                            <span class="{b.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">
-                                {b.progress}%
-                                {#if b.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}
-                            </span>
+                            <span class="{b.progress >= 100 ? 'text-destructive font-medium' : 'text-brand-green-dark dark:text-brand-green'}">{b.progress}%{#if b.progress >= 100}{t('budgets.over_budget')}{:else}{t('budgets.under_budget')}{/if}</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-muted sm:h-2.5">
                             <div class="h-2 rounded-full transition-all sm:h-2.5 {getProgressColor(b.progress)}" style="width: {Math.min(b.progress, 100)}%"></div>
                         </div>
                     </div>
                 {/each}
-
                 {#if categoryBudgets.length === 0}
                     <div class="rounded-xl border border-dashed border-hairline p-6 text-center sm:p-8">
                         <p class="text-xs text-muted-foreground sm:text-sm">{t('budgets.no_budget')}</p>
@@ -261,14 +336,10 @@
                 {:else}
                     <div class="mt-2"></div>
                 {/if}
-
                 <div class="animate-fade-in-up rounded-xl border border-hairline bg-card p-4 dark:bg-card sm:p-6">
                     <p class="mb-3 text-xs font-medium text-muted-foreground sm:text-sm">{t('budgets.set_budget')}</p>
                     <form onsubmit={(e) => { e.preventDefault(); saveBudget('category', categoryAmount, selectedCategoryId); }} class="space-y-3">
-                        <select
-                            bind:value={selectedCategoryId}
-                            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                        >
+                        <select bind:value={selectedCategoryId} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                             <option value="">{t('budgets.select_category')}</option>
                             {#each unusedCategories as c}
                                 <option value={c.id}>{localizedName(c)}</option>
@@ -280,7 +351,100 @@
                         </div>
                     </form>
                 </div>
+
+            {:else if activeTab === 'bills'}
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-semibold">{t('bills.title')}</h2>
+                    <Button size="sm" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" onclick={() => openBillModal()}>
+                        <Plus class="size-4 mr-1" /> {t('bills.add_bill')}
+                    </Button>
+                </div>
+                {#if bills.length === 0}
+                    <div class="rounded-xl border border-dashed border-hairline p-8 text-center">
+                        <Receipt class="mx-auto size-8 text-muted-foreground mb-3" />
+                        <p class="text-sm text-muted-foreground">{t('bills.empty')}</p>
+                    </div>
+                {:else}
+                    {#each bills as bill (bill.id)}
+                        <div class="rounded-xl border border-hairline bg-card p-4 dark:bg-card animate-fade-in-up">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3 min-w-0">
+                                    <div class="flex size-9 shrink-0 items-center justify-center rounded-full {bill.is_due_soon ? 'bg-accent-orange/10' : 'bg-brand-green-soft dark:bg-brand-green/10'}">
+                                        {#if bill.is_due_soon}
+                                            <AlarmClock class="size-4 text-accent-orange" />
+                                        {:else}
+                                            <Receipt class="size-4 text-brand-green-dark dark:text-brand-green" />
+                                        {/if}
+                                    </div>
+                                    <div class="min-w-0">
+                                        <h3 class="font-semibold text-sm truncate">{localizedName({ name: bill.name, name_en: bill.name_en })}</h3>
+                                        <p class="text-xs text-muted-foreground">
+                                            {billCategories.find(c => c.value === bill.category)?.label() || bill.category}
+                                            &middot; {recurrenceLabels[bill.recurrence]()} &middot; {t('bills.day')} {bill.due_day}
+                                            {#if bill.is_due_soon}
+                                                <span class="text-accent-orange font-medium">&middot; {t('bills.due_soon')}</span>
+                                            {/if}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="flex shrink-0 items-center gap-1">
+                                    <span class="text-sm font-bold">{formatAmount(bill.amount)}</span>
+                                    <Button variant="ghost" size="icon" class="size-7" onclick={() => openBillModal(bill)}><Pencil class="size-3.5" /></Button>
+                                    <Button variant="ghost" size="icon" class="size-7 text-destructive" onclick={() => confirmDelete('bill', bill.id)}><Trash2 class="size-3.5" /></Button>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between border-t border-hairline pt-3">
+                                <div class="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                    <Calendar class="size-3" />
+                                    {getDaysUntilDue(bill.due_day)}
+                                    &middot; {t('bills.remind_before')} {bill.reminder_days} {t('bills.days')}
+                                </div>
+                                <Button size="sm" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90 h-8 text-xs" onclick={() => payBill(bill)}>
+                                    <Check class="size-3 mr-1" /> {t('bills.pay')}
+                                </Button>
+                            </div>
+                        </div>
+                    {/each}
+                {/if}
             {/if}
         </div>
     </div>
 </PullToRefresh>
+
+<Dialog bind:open={showBillModal}>
+    <DialogContent class="sm:max-w-md">
+        <DialogHeader><DialogTitle>{editingBillId ? t('bills.edit_bill') : t('bills.add_bill')}</DialogTitle></DialogHeader>
+        <form onsubmit={(e) => { e.preventDefault(); saveBill(); }} class="space-y-4">
+            <div><Label for="billName">{t('bills.bill_name')}</Label><Input id="billName" bind:value={billName} required /></div>
+            <div><Label for="billAmount">{t('bills.amount')}</Label><Input id="billAmount" type="number" step="0.01" bind:value={billAmount} required /></div>
+            <div><Label for="billCategory">{t('bills.category_label')}</Label>
+                <select id="billCategory" bind:value={billCategory} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                    {#each billCategories as cat}<option value={cat.value}>{cat.label()}</option>{/each}
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div><Label for="billDueDay">{t('bills.due_day_label')}</Label><Input id="billDueDay" type="number" min="1" max="31" bind:value={billDueDay} required /></div>
+                <div><Label for="billReminder">{t('bills.reminder_days_label')}</Label><Input id="billReminder" type="number" min="0" max="30" bind:value={billReminder} /></div>
+            </div>
+            <div><Label for="billRecurrence">{t('bills.recurrence_label')}</Label>
+                <select id="billRecurrence" bind:value={billRecurrence} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                    <option value="monthly">{t('bills.monthly')}</option>
+                    <option value="weekly">{t('bills.weekly')}</option>
+                    <option value="yearly">{t('bills.yearly')}</option>
+                </select>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" type="button" onclick={() => showBillModal = false} class="rounded-full">{t('common.cancel')}</Button>
+                <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={billLoading}>{t('common.save')}</Button>
+            </DialogFooter>
+        </form>
+    </DialogContent>
+</Dialog>
+
+<ConfirmDialog
+    bind:open={showDeleteConfirm}
+    title={deleteTarget?.type === 'bill' ? t('bills.delete_confirm') : t('budgets.title')}
+    description={deleteTarget?.type === 'bill' ? t('bills.delete_desc') : ''}
+    confirmText={t('common.delete')}
+    onConfirm={doDelete}
+/>

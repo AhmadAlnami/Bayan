@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Bill;
 use App\Models\Budget;
 use App\Models\Category;
 use Carbon\Carbon;
@@ -38,6 +39,7 @@ class BudgetController extends Controller
         return Inertia::render('Budget', [
             'budgets' => $budgets->values(),
             'categories' => $categories->values(),
+            'bills' => $this->getFormattedBills($user),
         ]);
     }
 
@@ -135,5 +137,116 @@ class BudgetController extends Controller
         }
 
         return (float) $query->sum('amount');
+    }
+
+    private function getFormattedBills($user): array
+    {
+        return $user->bills()->orderBy('due_day')->get()->map(fn ($b) => [
+            'id' => $b->id,
+            'name' => $b->name,
+            'name_en' => $b->name_en,
+            'amount' => (float) $b->amount,
+            'category' => $b->category,
+            'category_en' => $b->category_en,
+            'due_day' => $b->due_day,
+            'reminder_days' => $b->reminder_days,
+            'recurrence' => $b->recurrence,
+            'is_active' => $b->is_active,
+            'last_paid_at' => $b->last_paid_at?->format('Y-m-d'),
+            'is_due_soon' => $b->isDueSoon(),
+        ])->values()->toArray();
+    }
+
+    public function storeBill(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'category' => 'nullable|string|max:50',
+            'due_day' => 'required|integer|min:1|max:31',
+            'reminder_days' => 'nullable|integer|min:0|max:30',
+            'recurrence' => 'required|in:monthly,weekly,yearly',
+        ]);
+
+        $request->user()->bills()->create([
+            'name' => $validated['name'],
+            'name_en' => $validated['name'],
+            'amount' => $validated['amount'],
+            'category' => $validated['category'] ?? 'أخرى',
+            'category_en' => $validated['category'] ?? 'Other',
+            'due_day' => $validated['due_day'],
+            'reminder_days' => $validated['reminder_days'] ?? 3,
+            'recurrence' => $validated['recurrence'],
+        ]);
+
+        return Redirect::route('budgets')->with('toast', [
+            'type' => 'success',
+            'message' => app()->getLocale() === 'en' ? 'Bill added!' : 'تمت إضافة الفاتورة!',
+        ]);
+    }
+
+    public function updateBill(Request $request, Bill $bill): RedirectResponse
+    {
+        if ($bill->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
+            'due_day' => 'required|integer|min:1|max:31',
+            'reminder_days' => 'nullable|integer|min:0|max:30',
+            'recurrence' => 'required|in:monthly,weekly,yearly',
+        ]);
+
+        $bill->update($validated);
+
+        return Redirect::route('budgets')->with('toast', [
+            'type' => 'success',
+            'message' => app()->getLocale() === 'en' ? 'Bill updated!' : 'تم تحديث الفاتورة!',
+        ]);
+    }
+
+    public function destroyBill(Request $request, Bill $bill): RedirectResponse
+    {
+        if ($bill->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $bill->delete();
+
+        return Redirect::route('budgets')->with('toast', [
+            'type' => 'success',
+            'message' => app()->getLocale() === 'en' ? 'Bill deleted!' : 'تم حذف الفاتورة!',
+        ]);
+    }
+
+    public function payBill(Request $request, Bill $bill): RedirectResponse
+    {
+        if ($bill->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $bill->update(['last_paid_at' => now()]);
+
+        $billsCategory = Category::where('type', 'expense')
+            ->whereNull('user_id')
+            ->where(function ($q) {
+                $q->where('name', 'فواتير')->orWhere('name_en', 'Bills');
+            })
+            ->first();
+
+        $request->user()->transactions()->create([
+            'amount' => $bill->amount,
+            'description' => $bill->name,
+            'transaction_date' => now(),
+            'type' => 'expense',
+            'category_id' => $billsCategory?->id,
+        ]);
+
+        return Redirect::route('budgets')->with('toast', [
+            'type' => 'success',
+            'message' => app()->getLocale() === 'en' ? 'Bill paid!' : 'تم تسديد الفاتورة!',
+        ]);
     }
 }

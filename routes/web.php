@@ -35,6 +35,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('budgets', [BudgetController::class, 'store'])->name('budgets.store');
     Route::delete('budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
 
+    Route::post('bills', [BudgetController::class, 'storeBill'])->name('bills.store');
+    Route::patch('bills/{bill}', [BudgetController::class, 'updateBill'])->name('bills.update');
+    Route::delete('bills/{bill}', [BudgetController::class, 'destroyBill'])->name('bills.destroy');
+    Route::post('bills/{bill}/pay', [BudgetController::class, 'payBill'])->name('bills.pay');
+
     Route::get('reports', [ReportsController::class, 'index'])->name('reports');
     Route::get('reports/print', [ReportsController::class, 'print'])->name('reports.print');
 

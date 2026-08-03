@@ -21,6 +21,7 @@
     import Calendar from 'lucide-svelte/icons/calendar';
     import AlertTriangle from 'lucide-svelte/icons/alert-triangle';
     import FileText from 'lucide-svelte/icons/file-text';
+    import AlarmClock from 'lucide-svelte/icons/alarm-clock';
     import PieChart from '@/components/charts/PieChart.svelte';
     import BarChart from '@/components/charts/BarChart.svelte';
     import LineChart from '@/components/charts/LineChart.svelte';
@@ -40,6 +41,7 @@
         budget_warnings = [] as { type: string; type_label: string; spent: number; amount: number; progress: number }[],
         summary = null as { today_expenses: number; today_count: number; week_expenses: number; week_count: number; avg_daily_this_month: number; trend_label: string; trend_pct: number } | null,
         savings_goals = [] as { id: number; name: string; name_en: string; target_amount: number; current_amount: number; progress: number; remaining: number }[],
+        upcoming_bills = [] as { id: number; name: string; name_en: string; amount: number; due_day: number; category: string; category_en: string }[],
     } = $props();
 
     let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
@@ -145,6 +147,27 @@
                         </div>
                     </div>
                 {/each}
+            </div>
+        {/if}
+
+        <!-- Bills due soon -->
+        {#if upcoming_bills.length > 0}
+            <div class="rounded-xl border border-hairline bg-accent-orange/5 p-3 sm:p-4 dark:bg-accent-orange/10">
+                <div class="flex items-center gap-2 mb-2">
+                    <AlarmClock class="size-4 text-accent-orange" />
+                    <h3 class="text-sm font-semibold">{t('bills.due_soon')}</h3>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    {#each upcoming_bills as bill}
+                        <div class="flex items-center gap-2 rounded-full bg-card border border-hairline px-3 py-1 text-xs">
+                            <span class="font-medium">{locale.value === 'ar' ? bill.name : bill.name_en}</span>
+                            <span class="text-muted-foreground">&middot;</span>
+                            <span class="text-accent-orange font-semibold">{formatAmount(bill.amount)}</span>
+                            <span class="text-muted-foreground">&middot;</span>
+                            <span>{t('bills.day')} {bill.due_day}</span>
+                        </div>
+                    {/each}
+                </div>
             </div>
         {/if}
 

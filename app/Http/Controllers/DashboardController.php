@@ -196,6 +196,21 @@ class DashboardController extends Controller
                 'remaining' => $g->remaining,
             ]);
 
+        $upcomingBills = $user->bills()
+            ->where('is_active', true)
+            ->get()
+            ->filter(fn ($b) => $b->isDueSoon())
+            ->map(fn ($b) => [
+                'id' => $b->id,
+                'name' => $b->name,
+                'name_en' => $b->name_en,
+                'amount' => (float) $b->amount,
+                'due_day' => $b->due_day,
+                'category' => $b->category,
+                'category_en' => $b->category_en,
+            ])
+            ->values();
+
         return Inertia::render('Dashboard', [
             'stats' => [
                 'total_expenses' => $user->transactions()->where('type', 'expense')->sum('amount'),
@@ -214,6 +229,7 @@ class DashboardController extends Controller
             'budget_warnings' => $budgetWarnings,
             'summary' => $summary,
             'savings_goals' => $savingsGoals,
+            'upcoming_bills' => $upcomingBills,
         ]);
     }
 

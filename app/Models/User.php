@@ -70,4 +70,9 @@ class User extends Authenticatable implements PasskeyUser
     {
         return $this->hasMany(SavingsGoal::class);
     }
+
+    public function bills(): HasMany
+    {
+        return $this->hasMany(Bill::class);
+    }
 }
