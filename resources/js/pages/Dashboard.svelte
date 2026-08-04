@@ -26,7 +26,7 @@
     import BarChart from '@/components/charts/BarChart.svelte';
     import LineChart from '@/components/charts/LineChart.svelte';
     import PullToRefresh from '@/components/PullToRefresh.svelte';
-    import { t, localizedName, localeState } from '@/lib/locale.svelte';
+    import { t, localizedName, localeState, relativeDate } from '@/lib/locale.svelte';
 
     const { locale } = localeState();
 
@@ -446,7 +446,7 @@
                             </div>
                             <div class="min-w-0 flex-1">
                                 <p class="truncate text-xs font-medium sm:text-sm">{tx.description}</p>
-                                <p class="text-[10px] text-muted-foreground sm:text-xs">{localizedName(tx.category) || t('transactions.no_category_label')}</p>
+                                <p class="text-[10px] text-muted-foreground sm:text-xs">{localizedName(tx.category) || t('transactions.no_category_label')} &middot; {relativeDate(tx.transaction_date)}</p>
                             </div>
                             <p class="text-xs font-semibold sm:text-sm {tx.type === 'expense' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
                                 {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}

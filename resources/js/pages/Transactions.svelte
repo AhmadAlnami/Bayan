@@ -18,7 +18,7 @@
     import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
     import Send from 'lucide-svelte/icons/send';
-    import { t, localizedName, localeState } from '@/lib/locale.svelte';
+    import { t, localizedName, localeState, relativeDate } from '@/lib/locale.svelte';
     import ConfirmDialog from '@/components/ConfirmDialog.svelte';
     import PullToRefresh from '@/components/PullToRefresh.svelte';
 
@@ -127,7 +127,7 @@
         <Button type="submit" size="icon" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={quickLoading || !quickText.trim()}>
             {#if quickLoading}<Spinner class="size-4" />{:else}<Send class="size-4" />{/if}
         </Button>
-        <Dialog open={showModal}>
+        <Dialog bind:open={showModal}>
             <DialogTrigger>
                 <Button onclick={openAddModal} variant="outline" size="icon" class="rounded-full"><Plus class="size-4" /></Button>
             </DialogTrigger>
@@ -170,7 +170,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <p class="truncate text-xs font-medium sm:text-sm">{tx.description}</p>
-                            <p class="text-[10px] text-muted-foreground sm:text-xs">{localizedName(tx.category) || t('transactions.no_category_label')}</p>
+                            <p class="text-[10px] text-muted-foreground sm:text-xs">{localizedName(tx.category) || t('transactions.no_category_label')} &middot; {relativeDate(tx.transaction_date)}</p>
                         </div>
                         <p class="text-xs font-semibold sm:text-sm {tx.type === 'expense' ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green'}">
                             {tx.type === 'expense' ? '-' : '+'}{formatAmount(tx.amount)}

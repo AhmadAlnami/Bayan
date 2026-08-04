@@ -8,6 +8,7 @@ use App\Services\AutoCategorizer;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -20,7 +21,7 @@ class TransactionController extends Controller
             ->transactions()
             ->with('category')
             ->where('type', $type)
-            ->orderByDesc('transaction_date')
+            ->orderByDesc(DB::raw('date(transaction_date)'))
             ->orderByDesc('created_at')
             ->limit(50)
             ->get()
@@ -87,7 +88,7 @@ class TransactionController extends Controller
         }
 
         $request->user()->transactions()->create([
-            'amount' => $amount, 'description' => $description ?: 'معاملة سريعة',
+            'amount' => $amount,             'description' => $description ?: (app()->getLocale() === 'en' ? 'Quick transaction' : 'معاملة سريعة'),
             'transaction_date' => Carbon::today(), 'category_id' => $categoryId, 'type' => $request->type,
         ]);
 
@@ -173,7 +174,7 @@ class TransactionController extends Controller
 
     private function checkBudgetExceeded($user): ?string
     {
-        $budgets = $user->budgets()->get();
+        $budgets = $user->budgets()->with('category')->get();
         if ($budgets->isEmpty()) {
             return null;
         }

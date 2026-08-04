@@ -7,6 +7,8 @@
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
     import FileText from 'lucide-svelte/icons/file-text';
     import PiggyBank from 'lucide-svelte/icons/piggy-bank';
+    import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
+    import Target from 'lucide-svelte/icons/target';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';

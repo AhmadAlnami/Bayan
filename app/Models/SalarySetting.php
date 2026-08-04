@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SalarySetting extends Model
 {
-    protected $fillable = ['amount', 'day_of_month', 'is_active'];
+    protected $fillable = ['user_id', 'amount', 'day_of_month', 'is_active'];
 
     protected function casts(): array
     {

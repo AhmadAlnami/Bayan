@@ -43,7 +43,7 @@ class DashboardController extends Controller
 
         $recentTransactions = $user->transactions()
             ->with('category')
-            ->orderByDesc('transaction_date')
+            ->orderByDesc(DB::raw('date(transaction_date)'))
             ->orderByDesc('created_at')
             ->limit(5)
             ->get()

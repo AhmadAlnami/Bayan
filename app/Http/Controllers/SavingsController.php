@@ -85,6 +85,7 @@ class SavingsController extends Controller
             'deadline' => 'nullable|date',
             'auto_save_amount' => 'nullable|numeric|min:0',
             'auto_save_day' => 'nullable|integer|min:1|max:28',
+            'category' => 'nullable|string|max:50',
         ]);
 
         $savingsGoal->update([
@@ -94,6 +95,8 @@ class SavingsController extends Controller
             'deadline' => $validated['deadline'] ?? $savingsGoal->deadline,
             'auto_save_amount' => $validated['auto_save_amount'] ?? $savingsGoal->auto_save_amount,
             'auto_save_day' => $validated['auto_save_day'] ?? $savingsGoal->auto_save_day,
+            'category' => $validated['category'] ?? $savingsGoal->category,
+            'category_en' => $validated['category'] ?? $savingsGoal->category_en,
         ]);
 
         return Redirect::route('savings')->with('toast', [

@@ -259,7 +259,7 @@
                                 <div class="space-y-1 text-xs text-muted-foreground">
                                     {#each goal.recent_deposits as dep}
                                         <div class="flex justify-between">
-                                            <span>{dep.created_at} {dep.note ? '&middot; ' + dep.note : ''}</span>
+                                                <span>{dep.created_at}{#if dep.note} · {dep.note}{/if}</span>
                                             <span class="font-medium text-brand-green-dark dark:text-brand-green">+{formatAmount(dep.amount)}</span>
                                         </div>
                                     {/each}
@@ -315,7 +315,8 @@
 </Dialog>
 
 <ConfirmDialog
-    bind:open={showDeleteConfirm}
+    open={showDeleteConfirm}
+    onOpenChange={(v) => showDeleteConfirm = v}
     title={t('savings.delete_confirm')}
     description={t('savings.delete_desc')}
     confirmText={t('common.delete')}

@@ -14,6 +14,7 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255',
             'icon' => 'nullable|string|max:255',
             'color' => 'nullable|string|max:255',
+            'type' => 'required|in:expense,income',
         ]);
 
         $request->user()->categories()->create($validated);

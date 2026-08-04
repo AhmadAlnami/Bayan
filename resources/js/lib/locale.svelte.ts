@@ -55,3 +55,23 @@ export function localeState(): LocaleState {
         updateLocale,
     };
 }
+
+export function relativeDate(dateStr: string): string {
+    const date = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+
+    const diffMs = today.getTime() - date.getTime();
+    const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    const ar = ['اليوم', 'أمس', 'قبل أمس'];
+    const en = ['Today', 'Yesterday', '2 days ago'];
+
+    if (diffDays >= 0 && diffDays < 3) {
+        return locale.value === 'ar' ? ar[diffDays] : en[diffDays];
+    }
+
+    const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+    return date.toLocaleDateString(numLocale, { year: 'numeric', month: 'short', day: 'numeric' });
+}

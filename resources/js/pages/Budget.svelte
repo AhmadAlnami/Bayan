@@ -44,6 +44,7 @@
     let billAmount = $state('');
     let billCategory = $state('');
     let billDueDay = $state('');
+    let billDueMonth = $state('');
     let billReminder = $state('3');
     let billRecurrence = $state('monthly');
     let billLoading = $state(false);
@@ -75,6 +76,33 @@
         weekly: () => t('bills.weekly'),
         yearly: () => t('bills.yearly'),
     };
+
+    const weekdayNames: Record<number, () => string> = {
+        0: () => locale.value === 'ar' ? 'الأحد' : 'Sunday',
+        1: () => locale.value === 'ar' ? 'الإثنين' : 'Monday',
+        2: () => locale.value === 'ar' ? 'الثلاثاء' : 'Tuesday',
+        3: () => locale.value === 'ar' ? 'الأربعاء' : 'Wednesday',
+        4: () => locale.value === 'ar' ? 'الخميس' : 'Thursday',
+        5: () => locale.value === 'ar' ? 'الجمعة' : 'Friday',
+        6: () => locale.value === 'ar' ? 'السبت' : 'Saturday',
+    };
+
+    const monthNames: Record<number, () => string> = {
+        1: () => t('bills.january'), 2: () => t('bills.february'), 3: () => t('bills.march'),
+        4: () => t('bills.april'), 5: () => t('bills.may'), 6: () => t('bills.june'),
+        7: () => t('bills.july'), 8: () => t('bills.august'), 9: () => t('bills.september'),
+        10: () => t('bills.october'), 11: () => t('bills.november'), 12: () => t('bills.december'),
+    };
+
+    function getBillDueLabel(bill: any): string {
+        if (bill.recurrence === 'weekly') {
+            return (weekdayNames[bill.due_day] || weekdayNames[0])();
+        }
+        if (bill.recurrence === 'yearly' && bill.due_month) {
+            return (monthNames[bill.due_month] || (() => ''))() + ' ' + bill.due_day;
+        }
+        return t('bills.day') + ' ' + bill.due_day;
+    }
 
     function getBudget(type: string, categoryId: number | null = null) {
         return budgets.find((b: any) => {
@@ -136,12 +164,13 @@
             billAmount = String(bill.amount);
             billCategory = bill.category;
             billDueDay = String(bill.due_day);
+            billDueMonth = bill.due_month ? String(bill.due_month) : '';
             billReminder = String(bill.reminder_days);
             billRecurrence = bill.recurrence;
         } else {
             editingBillId = null;
             billName = ''; billAmount = ''; billCategory = ''; billDueDay = '1';
-            billReminder = '3'; billRecurrence = 'monthly';
+            billDueMonth = ''; billReminder = '3'; billRecurrence = 'monthly';
         }
         showBillModal = true;
     }
@@ -150,7 +179,8 @@
         billLoading = true;
         const data: Record<string, any> = {
             name: billName, amount: parseFloat(billAmount), category: billCategory || 'أخرى',
-            due_day: parseInt(billDueDay), reminder_days: parseInt(billReminder), recurrence: billRecurrence,
+            due_day: parseInt(billDueDay), due_month: billDueMonth ? parseInt(billDueMonth) : undefined,
+            reminder_days: parseInt(billReminder), recurrence: billRecurrence,
         };
         if (editingBillId) {
             router.patch(`/bills/${editingBillId}`, data, {
@@ -380,7 +410,7 @@
                                         <h3 class="font-semibold text-sm truncate">{localizedName({ name: bill.name, name_en: bill.name_en })}</h3>
                                         <p class="text-xs text-muted-foreground">
                                             {billCategories.find(c => c.value === bill.category)?.label() || bill.category}
-                                            &middot; {recurrenceLabels[bill.recurrence]()} &middot; {t('bills.day')} {bill.due_day}
+                                            &middot; {recurrenceLabels[bill.recurrence]()} &middot; {getBillDueLabel(bill)}
                                             {#if bill.is_due_soon}
                                                 <span class="text-accent-orange font-medium">&middot; {t('bills.due_soon')}</span>
                                             {/if}
@@ -422,17 +452,40 @@
                     {#each billCategories as cat}<option value={cat.value}>{cat.label()}</option>{/each}
                 </select>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-                <div><Label for="billDueDay">{t('bills.due_day_label')}</Label><Input id="billDueDay" type="number" min="1" max="31" bind:value={billDueDay} required /></div>
-                <div><Label for="billReminder">{t('bills.reminder_days_label')}</Label><Input id="billReminder" type="number" min="0" max="30" bind:value={billReminder} /></div>
-            </div>
-            <div><Label for="billRecurrence">{t('bills.recurrence_label')}</Label>
+            <div>
+                <Label for="billRecurrence">{t('bills.recurrence_label')}</Label>
                 <select id="billRecurrence" bind:value={billRecurrence} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                     <option value="monthly">{t('bills.monthly')}</option>
                     <option value="weekly">{t('bills.weekly')}</option>
                     <option value="yearly">{t('bills.yearly')}</option>
                 </select>
             </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <Label for="billDueDay">
+                        {#if billRecurrence === 'weekly'}{t('bills.weekday_label')}
+                        {:else if billRecurrence === 'yearly'}{t('bills.day_label')}
+                        {:else}{t('bills.due_day_label')}{/if}
+                    </Label>
+                    {#if billRecurrence === 'weekly'}
+                        <select id="billDueDay" bind:value={billDueDay} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                            {#each Object.entries(weekdayNames) as [key, label]}<option value={key}>{label()}</option>{/each}
+                        </select>
+                    {:else}
+                        <Input id="billDueDay" type="number" min="1" max="31" bind:value={billDueDay} required />
+                    {/if}
+                </div>
+                <div><Label for="billReminder">{t('bills.reminder_days_label')}</Label><Input id="billReminder" type="number" min="0" max="30" bind:value={billReminder} /></div>
+            </div>
+            {#if billRecurrence === 'yearly'}
+                <div>
+                    <Label for="billDueMonth">{t('bills.month_label')}</Label>
+                    <select id="billDueMonth" bind:value={billDueMonth} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="">{t('bills.select_month')}</option>
+                        {#each Object.entries(monthNames) as [key, label]}<option value={key}>{label()}</option>{/each}
+                    </select>
+                </div>
+            {/if}
             <DialogFooter>
                 <Button variant="outline" type="button" onclick={() => showBillModal = false} class="rounded-full">{t('common.cancel')}</Button>
                 <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={billLoading}>{t('common.save')}</Button>
@@ -442,8 +495,9 @@
 </Dialog>
 
 <ConfirmDialog
-    bind:open={showDeleteConfirm}
-    title={deleteTarget?.type === 'bill' ? t('bills.delete_confirm') : t('budgets.title')}
+    open={showDeleteConfirm}
+    onOpenChange={(v) => showDeleteConfirm = v}
+    title={deleteTarget?.type === 'bill' ? t('bills.delete_confirm') : t('common.confirm')}
     description={deleteTarget?.type === 'bill' ? t('bills.delete_desc') : ''}
     confirmText={t('common.delete')}
     onConfirm={doDelete}

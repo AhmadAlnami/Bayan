@@ -149,6 +149,7 @@ class BudgetController extends Controller
             'category' => $b->category,
             'category_en' => $b->category_en,
             'due_day' => $b->due_day,
+            'due_month' => $b->due_month,
             'reminder_days' => $b->reminder_days,
             'recurrence' => $b->recurrence,
             'is_active' => $b->is_active,
@@ -163,7 +164,8 @@ class BudgetController extends Controller
             'name' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
             'category' => 'nullable|string|max:50',
-            'due_day' => 'required|integer|min:1|max:31',
+            'due_day' => 'required|integer|min:0|max:31',
+            'due_month' => 'nullable|integer|min:1|max:12',
             'reminder_days' => 'nullable|integer|min:0|max:30',
             'recurrence' => 'required|in:monthly,weekly,yearly',
         ]);
@@ -175,6 +177,7 @@ class BudgetController extends Controller
             'category' => $validated['category'] ?? 'أخرى',
             'category_en' => $validated['category'] ?? 'Other',
             'due_day' => $validated['due_day'],
+            'due_month' => $validated['due_month'] ?? null,
             'reminder_days' => $validated['reminder_days'] ?? 3,
             'recurrence' => $validated['recurrence'],
         ]);
@@ -194,11 +197,16 @@ class BudgetController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
-            'due_day' => 'required|integer|min:1|max:31',
+            'due_day' => 'required|integer|min:0|max:31',
+            'due_month' => 'nullable|integer|min:1|max:12',
             'reminder_days' => 'nullable|integer|min:0|max:30',
             'recurrence' => 'required|in:monthly,weekly,yearly',
+            'category' => 'nullable|string|max:50',
         ]);
 
+        if (isset($validated['category'])) {
+            $validated['category_en'] = $validated['category'];
+        }
         $bill->update($validated);
 
         return Redirect::route('budgets')->with('toast', [
@@ -239,7 +247,7 @@ class BudgetController extends Controller
         $request->user()->transactions()->create([
             'amount' => $bill->amount,
             'description' => $bill->name,
-            'transaction_date' => now(),
+            'transaction_date' => Carbon::today(),
             'type' => 'expense',
             'category_id' => $billsCategory?->id,
         ]);
