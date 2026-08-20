@@ -5,13 +5,13 @@
 </script>
 
 <script lang="ts">
-    import AppHead from '@/components/AppHead.svelte';
-    import TrendingDown from 'lucide-svelte/icons/trending-down';
-    import TrendingUp from 'lucide-svelte/icons/trending-up';
+    import Gauge from 'lucide-svelte/icons/gauge';
     import PiggyBank from 'lucide-svelte/icons/piggy-bank';
     import Target from 'lucide-svelte/icons/target';
+    import TrendingDown from 'lucide-svelte/icons/trending-down';
+    import TrendingUp from 'lucide-svelte/icons/trending-up';
     import Zap from 'lucide-svelte/icons/zap';
-    import Gauge from 'lucide-svelte/icons/gauge';
+    import AppHead from '@/components/AppHead.svelte';
     import { t, localizedName, localeState } from '@/lib/locale.svelte';
 
     const { locale } = localeState();
@@ -29,6 +29,7 @@
 
     function formatAmount(amount: number): string {
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 

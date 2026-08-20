@@ -11,9 +11,9 @@
     import TextLink from '@/components/TextLink.svelte';
     import { Button } from '@/components/ui/button';
     import { Spinner } from '@/components/ui/spinner';
+    import { t } from '@/lib/locale.svelte';
     import { logout } from '@/routes';
     import { send } from '@/routes/verification';
-    import { t } from '@/lib/locale.svelte';
 
     let {
         status = '',

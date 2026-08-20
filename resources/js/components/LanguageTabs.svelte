@@ -1,7 +1,8 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
     import Languages from 'lucide-svelte/icons/languages';
-    import { localeState, updateLocale, type Locale } from '@/lib/locale.svelte';
+    import { localeState, updateLocale  } from '@/lib/locale.svelte';
+import type {Locale} from '@/lib/locale.svelte';
 
     let { currentLocale = 'ar' }: { currentLocale?: Locale } = $props();
 

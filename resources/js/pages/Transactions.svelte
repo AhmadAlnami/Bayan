@@ -6,21 +6,21 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import AppHead from '@/components/AppHead.svelte';
-    import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
-    import { Label } from '@/components/ui/label';
-    import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-    import { Spinner } from '@/components/ui/spinner';
-    import Plus from 'lucide-svelte/icons/plus';
-    import Trash2 from 'lucide-svelte/icons/trash-2';
-    import Pencil from 'lucide-svelte/icons/pencil';
-    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
+    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
+    import Pencil from 'lucide-svelte/icons/pencil';
+    import Plus from 'lucide-svelte/icons/plus';
     import Send from 'lucide-svelte/icons/send';
-    import { t, localizedName, localeState, relativeDate } from '@/lib/locale.svelte';
+    import Trash2 from 'lucide-svelte/icons/trash-2';
+    import AppHead from '@/components/AppHead.svelte';
     import ConfirmDialog from '@/components/ConfirmDialog.svelte';
     import PullToRefresh from '@/components/PullToRefresh.svelte';
+    import { Button } from '@/components/ui/button';
+    import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+    import { Input } from '@/components/ui/input';
+    import { Label } from '@/components/ui/label';
+    import { Spinner } from '@/components/ui/spinner';
+    import { t, localizedName, localeState, relativeDate } from '@/lib/locale.svelte';
 
     const { locale } = localeState();
 
@@ -47,9 +47,15 @@
     }
 
     function onSwipeEnd(e: TouchEvent) {
-        if (!e.changedTouches.length) return;
+        if (!e.changedTouches.length) {
+return;
+}
+
         const diff = e.changedTouches[0].clientX - swipeStart;
-        if (Math.abs(diff) < 60) return;
+
+        if (Math.abs(diff) < 60) {
+return;
+}
 
         swipeAnimating = diff > 0 ? 'right' : 'left';
         const nextType = diff > 0 ? 'expense' : 'income';
@@ -77,15 +83,22 @@
             method: editingId ? 'patch' : 'post',
             data: { amount: formAmount, description: formDescription, transaction_date: formDate, category_id: formCategoryId, type: editingId ? undefined : type },
             preserveScroll: true,
-            onFinish: () => { loading = false; showModal = false; },
+            onFinish: () => {
+ loading = false; showModal = false; 
+},
         });
     }
     function quickAdd() {
-        if (!quickText.trim()) return;
+        if (!quickText.trim()) {
+return;
+}
+
         quickLoading = true;
         router.post('/transactions/quick', { text: quickText, type }, {
             preserveScroll: true,
-            onFinish: () => { quickLoading = false; quickText = ''; },
+            onFinish: () => {
+ quickLoading = false; quickText = ''; 
+},
         });
     }
     function del(tx: any) {
@@ -93,13 +106,17 @@
         showConfirmDelete = true;
     }
     function confirmDelete() {
-        if (deleteTarget) router.delete(`/transactions/${deleteTarget.id}`, { preserveScroll: true });
+        if (deleteTarget) {
+router.delete(`/transactions/${deleteTarget.id}`, { preserveScroll: true });
+}
+
         showConfirmDelete = false;
         deleteTarget = null;
     }
 
     function formatAmount(amount: number): string {
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 </script>
@@ -122,7 +139,9 @@
         </div>
     </div>
 
-    <form onsubmit={(e) => { e.preventDefault(); quickAdd(); }} class="flex gap-2">
+    <form onsubmit={(e) => {
+ e.preventDefault(); quickAdd(); 
+}} class="flex gap-2">
         <Input placeholder={type === 'expense' ? t('transactions.quick_add_expense') : t('transactions.quick_add_income')} bind:value={quickText} class="flex-1" />
         <Button type="submit" size="icon" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={quickLoading || !quickText.trim()}>
             {#if quickLoading}<Spinner class="size-4" />{:else}<Send class="size-4" />{/if}
@@ -133,9 +152,11 @@
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader><DialogTitle>{editingId ? t('transactions.edit') : (type === 'expense' ? t('transactions.add_expense') : t('transactions.add_income'))}</DialogTitle></DialogHeader>
-                <form onsubmit={(e) => { e.preventDefault(); save(); }} class="space-y-4">
+                <form onsubmit={(e) => {
+ e.preventDefault(); save(); 
+}} class="space-y-4">
                     <div><Label>{t('transactions.amount')}</Label><Input type="number" step="0.01" bind:value={formAmount} required /></div>
-                    <div><Label>{t('transactions.description')}</Label><Input bind:value={formDescription} required /></div>
+                    <div><Label>{t('transactions.description')}</Label><Input bind:value={formDescription} /></div>
                     <div><Label>{t('transactions.date')}</Label><Input type="date" bind:value={formDate} required /></div>
                     <div>
                         <Label>{t('transactions.category')}</Label>

@@ -30,12 +30,12 @@ class ProcessSalaryDeposits extends Command
             return;
         }
 
-        $salaryCategory = Category::where('type', 'income')
-            ->where('name', 'راتب')
-            ->whereNull('user_id')
-            ->first();
-
         foreach ($settings as $setting) {
+            $salaryCategory = Category::availableFor($setting->user)
+                ->where('type', 'income')
+                ->where('name', 'راتب')
+                ->first();
+
             $depositDate = $this->adjustForWeekend($today, $actualDay);
 
             Transaction::create([

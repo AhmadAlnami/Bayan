@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { Line } from 'svelte-chartjs';
     import {
         Chart as ChartJS,
         CategoryScale,
@@ -10,6 +9,7 @@
         Legend,
         Filler,
     } from 'chart.js';
+    import { Line } from 'svelte-chartjs';
     import { t, localeState } from '@/lib/locale.svelte';
 
     const { locale } = localeState();
@@ -72,6 +72,7 @@
                 callbacks: {
                     label: (ctx: any) => {
                         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
                         return `${ctx.dataset.label}: ${ctx.raw.toLocaleString(numLocale)} ${t('common.sar')}`;
                     },
                 },

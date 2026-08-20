@@ -1,6 +1,7 @@
 <script lang="ts">
     import { page } from '@inertiajs/svelte';
     import ChevronsUpDown from 'lucide-svelte/icons/chevrons-up-down';
+    import { Button } from '@/components/ui/button';
     import {
         DropdownMenu,
         DropdownMenuContent,
@@ -13,7 +14,6 @@
     } from '@/components/ui/sidebar';
     import UserInfo from '@/components/UserInfo.svelte';
     import UserMenuContent from '@/components/UserMenuContent.svelte';
-    import { Button } from '@/components/ui/button';
 
     const user = $derived(page.props.auth.user);
 </script>

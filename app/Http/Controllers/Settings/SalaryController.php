@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Models\Category;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
@@ -14,6 +15,9 @@ class SalaryController extends Controller
     public function edit(Request $request): Response
     {
         $setting = $request->user()->salarySetting;
+        $incomeCategories = Category::availableFor($request->user())
+            ->where('type', 'income')
+            ->get(['id', 'name', 'name_en']);
 
         return Inertia::render('settings/Salary', [
             'setting' => $setting ? [

@@ -1,7 +1,8 @@
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import type { Snippet } from 'svelte';
     import RefreshCw from 'lucide-svelte/icons/refresh-cw';
+    import type { Snippet } from 'svelte';
+    import { t } from '@/lib/locale.svelte';
 
     let {
         children,
@@ -16,13 +17,19 @@
     const threshold = 80;
 
     function onTouchStart(e: TouchEvent) {
-        if (window.scrollY > 0) return;
+        if (window.scrollY > 0) {
+return;
+}
+
         startY = e.touches[0].clientY;
         pulling = true;
     }
 
     function onTouchMove(e: TouchEvent) {
-        if (!pulling) return;
+        if (!pulling) {
+return;
+}
+
         pullDistance = Math.max(0, (e.touches[0].clientY - startY) * 0.5);
     }
 
@@ -36,6 +43,7 @@
         } else {
             pullDistance = 0;
         }
+
         pulling = false;
     }
 
@@ -68,7 +76,7 @@
     >
         <div class="flex items-center gap-2 text-xs text-muted-foreground">
             <RefreshCw class="size-4 {rotate}" />
-            <span>{refreshing ? 'جاري التحديث...' : translate >= threshold ? 'افلت للتحديث' : 'اسحب للتحديث'}</span>
+            <span>{refreshing ? t('pull_to_refresh.refreshing') : translate >= threshold ? t('pull_to_refresh.release') : t('pull_to_refresh.pull')}</span>
         </div>
     </div>
 

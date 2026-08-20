@@ -1,11 +1,11 @@
 <script lang="ts">
-    import { Pie } from 'svelte-chartjs';
     import {
         Chart as ChartJS,
         ArcElement,
         Tooltip,
         Legend,
     } from 'chart.js';
+    import { Pie } from 'svelte-chartjs';
     import { t, localeState } from '@/lib/locale.svelte';
 
     const { locale } = localeState();
@@ -47,6 +47,7 @@
                         const total = ctx.dataset.data.reduce((a: number, b: number) => a + b, 0);
                         const pct = total > 0 ? ((ctx.raw / total) * 100).toFixed(1) : '0';
                         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
                         return `${ctx.label}: ${ctx.raw.toLocaleString(numLocale)} ${t('common.sar')} (${pct}%)`;
                     },
                 },

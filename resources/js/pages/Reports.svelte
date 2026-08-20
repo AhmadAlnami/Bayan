@@ -6,20 +6,20 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import AppHead from '@/components/AppHead.svelte';
-    import { Button } from '@/components/ui/button';
-    import PieChart from '@/components/charts/PieChart.svelte';
-    import BarChart from '@/components/charts/BarChart.svelte';
-    import PullToRefresh from '@/components/PullToRefresh.svelte';
-    import TrendingUp from 'lucide-svelte/icons/trending-up';
-    import TrendingDown from 'lucide-svelte/icons/trending-down';
-    import DollarSign from 'lucide-svelte/icons/dollar-sign';
-    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
-    import PiggyBank from 'lucide-svelte/icons/piggy-bank';
+    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import ChevronLeft from 'lucide-svelte/icons/chevron-left';
     import ChevronRight from 'lucide-svelte/icons/chevron-right';
+    import DollarSign from 'lucide-svelte/icons/dollar-sign';
     import FileDown from 'lucide-svelte/icons/file-down';
+    import PiggyBank from 'lucide-svelte/icons/piggy-bank';
+    import TrendingDown from 'lucide-svelte/icons/trending-down';
+    import TrendingUp from 'lucide-svelte/icons/trending-up';
+    import AppHead from '@/components/AppHead.svelte';
+    import BarChart from '@/components/charts/BarChart.svelte';
+    import PieChart from '@/components/charts/PieChart.svelte';
+    import PullToRefresh from '@/components/PullToRefresh.svelte';
+    import { Button } from '@/components/ui/button';
     import { t, localizedName, localeState } from '@/lib/locale.svelte';
 
     const { locale } = localeState();
@@ -84,12 +84,14 @@
 
     function formatAmount(amount: number): string {
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 
     function formatDate(dateStr: string): string {
         const d = new Date(dateStr);
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return d.toLocaleDateString(numLocale, { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
@@ -98,7 +100,10 @@
     }
 
     function getCategoryName(cat: any): string {
-        if (!cat) return t('transactions.no_category_label');
+        if (!cat) {
+return t('transactions.no_category_label');
+}
+
         return localizedName(cat);
     }
 
@@ -113,8 +118,14 @@
     const barValuesIncome = $derived(report.chart.map((d) => d.income ?? 0));
 
     function getChangeColor(change: number, inverse = false): string {
-        if (change === 0) return 'text-muted-foreground';
-        if (inverse) return change > 0 ? 'text-brand-green-dark dark:text-brand-green' : 'text-destructive';
+        if (change === 0) {
+return 'text-muted-foreground';
+}
+
+        if (inverse) {
+return change > 0 ? 'text-brand-green-dark dark:text-brand-green' : 'text-destructive';
+}
+
         return change > 0 ? 'text-destructive' : 'text-brand-green-dark dark:text-brand-green';
     }
 

@@ -24,9 +24,7 @@ class BudgetController extends Controller
             ->get()
             ->map(fn ($b) => $this->formatBudgetWithProgress($b, $user));
 
-        $categories = Category::where(function ($q) use ($user) {
-            $q->whereNull('user_id')->orWhere('user_id', $user->id);
-        })
+        $categories = Category::availableFor($user)
             ->where('type', 'expense')
             ->get()
             ->map(fn ($c) => [
@@ -237,8 +235,8 @@ class BudgetController extends Controller
 
         $bill->update(['last_paid_at' => now()]);
 
-        $billsCategory = Category::where('type', 'expense')
-            ->whereNull('user_id')
+        $billsCategory = Category::availableFor($request->user())
+            ->where('type', 'expense')
             ->where(function ($q) {
                 $q->where('name', 'فواتير')->orWhere('name_en', 'Bills');
             })

@@ -8,25 +8,33 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import AppHead from '@/components/AppHead.svelte';
-    import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
-    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
+    import AlarmClock from 'lucide-svelte/icons/alarm-clock';
+    import AlertTriangle from 'lucide-svelte/icons/alert-triangle';
     import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
+    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
+    import Calendar from 'lucide-svelte/icons/calendar';
+    import Check from 'lucide-svelte/icons/check';
+    import ExternalLink from 'lucide-svelte/icons/external-link';
+    import FileText from 'lucide-svelte/icons/file-text';
+    import Loader2 from 'lucide-svelte/icons/loader-2';
+    import MessageSquare from 'lucide-svelte/icons/message-square';
+    import RefreshCw from 'lucide-svelte/icons/refresh-cw';
     import Send from 'lucide-svelte/icons/send';
-    import Wallet from 'lucide-svelte/icons/wallet';
     import Target from 'lucide-svelte/icons/target';
     import TrendingDown from 'lucide-svelte/icons/trending-down';
     import TrendingUp from 'lucide-svelte/icons/trending-up';
-    import Calendar from 'lucide-svelte/icons/calendar';
-    import AlertTriangle from 'lucide-svelte/icons/alert-triangle';
-    import FileText from 'lucide-svelte/icons/file-text';
-    import AlarmClock from 'lucide-svelte/icons/alarm-clock';
-    import PieChart from '@/components/charts/PieChart.svelte';
+    import Wallet from 'lucide-svelte/icons/wallet';
+    import X from 'lucide-svelte/icons/x';
+    import AppHead from '@/components/AppHead.svelte';
     import BarChart from '@/components/charts/BarChart.svelte';
     import LineChart from '@/components/charts/LineChart.svelte';
+    import PieChart from '@/components/charts/PieChart.svelte';
     import PullToRefresh from '@/components/PullToRefresh.svelte';
+    import { Button } from '@/components/ui/button';
+    import { Input } from '@/components/ui/input';
+    import { connectAssistantStream } from '@/lib/assistantStream';
     import { t, localizedName, localeState, relativeDate } from '@/lib/locale.svelte';
+    import { parseMarkdownStreaming } from '@/lib/markdown';
 
     const { locale } = localeState();
 
@@ -44,34 +52,271 @@
         upcoming_bills = [] as { id: number; name: string; name_en: string; amount: number; due_day: number; category: string; category_en: string }[],
     } = $props();
 
-    let chatMessages = $state([{ role: 'assistant', content: t('dashboard.chat_greeting') }]);
+    type ChatMessage = {
+        id: string;
+        role: 'user' | 'assistant';
+        content: string;
+        html?: string;
+        toolCalls?: { id: string; name: string; status: 'running' | 'completed' | 'failed'; summary?: string }[];
+        isStreaming?: boolean;
+    };
+
+    let chatMessages = $state<ChatMessage[]>([]);
     let chatInput = $state('');
+    let chatStreaming = $state(false);
+    let chatAbort: { abort: () => void } | null = null;
+    let chatRetry = $state<{
+        text: string;
+        context: string;
+        userMessageId: string;
+        failedMessageId: string;
+    } | null>(null);
+    let chatContainerRef: HTMLDivElement | null = $state(null);
 
     let quickText = $state('');
     let quickType = $state<'expense' | 'income'>('expense');
     let quickLoading = $state(false);
 
     function quickAdd() {
-        if (!quickText.trim()) return;
+        if (!quickText.trim()) {
+return;
+}
+
         quickLoading = true;
         const desc = quickText;
         quickText = '';
 
         router.post('/transactions/quick', { text: desc, type: quickType }, {
             preserveScroll: true,
-            onFinish: () => { quickLoading = false; },
+            onFinish: () => {
+ quickLoading = false; 
+},
         });
     }
 
-    function sendChatMessage() {
-        if (!chatInput.trim()) return;
-        chatMessages = [...chatMessages, { role: 'user', content: chatInput }];
-        chatInput = '';
-        setTimeout(() => { chatMessages = [...chatMessages, { role: 'assistant', content: t('dashboard.chat_coming_soon') }]; }, 1000);
+    function chatScrollToBottom(): void {
+        if (chatContainerRef) {
+            chatContainerRef.scrollTo({ top: chatContainerRef.scrollHeight, behavior: 'smooth' });
+        }
     }
+
+    function sendChatMessage(): void {
+        const text = chatInput.trim();
+
+        if (!text || chatStreaming) {
+return;
+}
+
+        const history = chatMessages.map((m) => ({
+            role: m.role,
+            content: m.content,
+        }));
+
+        const userMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            role: 'user',
+            content: text,
+        };
+        chatMessages = [...chatMessages, userMessage];
+        chatInput = '';
+        chatRetry = null;
+        chatStreaming = true;
+
+        const assistantMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: '',
+            html: '',
+            toolCalls: [],
+            isStreaming: true,
+        };
+        chatMessages = [...chatMessages, assistantMessage];
+
+        chatAbort = connectAssistantStream(text, history, {
+            onText: (delta) => {
+                const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+
+                if (idx >= 0) {
+                    chatMessages[idx].content += delta;
+                    chatMessages[idx].html = parseMarkdownStreaming(chatMessages[idx].content);
+                    chatMessages = [...chatMessages];
+                }
+            },
+            onToolCall: (_id, name) => {
+                const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+
+                if (idx >= 0) {
+                    chatMessages[idx].toolCalls = [
+                        ...(chatMessages[idx].toolCalls ?? []),
+                        { id: crypto.randomUUID(), name, status: 'running' },
+                    ];
+                    chatMessages = [...chatMessages];
+                }
+            },
+            onToolResult: (_id, name, summary, ok) => {
+                const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+                const toolCalls = chatMessages[idx]?.toolCalls;
+
+                if (toolCalls) {
+                    const tcIdx = toolCalls.findIndex((tc) => tc.name === name && tc.status === 'running');
+
+                    if (tcIdx >= 0) {
+                        toolCalls[tcIdx].status = ok ? 'completed' : 'failed';
+                        toolCalls[tcIdx].summary = summary;
+                        chatMessages = [...chatMessages];
+                    }
+                }
+            },
+            onError: (error, errorCode) => {
+                const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+
+                if (idx >= 0) {
+                    const message =
+                        errorCode === 'rate_limited'
+                            ? t('assistant.error_rate_limited')
+                            : errorCode === 'action_done'
+                              ? t('assistant.error_action_done')
+                              : errorCode === 'ai_error'
+                                ? t('assistant.error_ai')
+                                : error;
+
+                    chatMessages[idx].content += `\n\n⚠️ ${message}`;
+                    chatMessages[idx].html = parseMarkdownStreaming(chatMessages[idx].content);
+                    chatMessages[idx].isStreaming = false;
+                    chatStreaming = false;
+                    chatMessages = [...chatMessages];
+
+                    if (errorCode === 'action_done') {
+                        const toolCalls = chatMessages[idx]?.toolCalls ?? [];
+                        const userMsg = chatMessages[idx - 1];
+                        const failedMsg = chatMessages[idx];
+
+                        if (toolCalls.length > 0 && userMsg && failedMsg) {
+                            const context = toolCalls
+                                .map((tc) => `${tc.name}: ${tc.summary ?? t('assistant.tool_failed')}`)
+                                .join('\n');
+
+                            chatRetry = {
+                                text: userMsg.content,
+                                context,
+                                userMessageId: userMsg.id,
+                                failedMessageId: failedMsg.id,
+                            };
+                        }
+                    }
+                }
+            },
+            onDone: () => {
+                const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+
+                if (idx >= 0) {
+                    chatMessages[idx].isStreaming = false;
+                    chatMessages[idx].html = parseMarkdownStreaming(chatMessages[idx].content);
+                    chatStreaming = false;
+                    chatMessages = [...chatMessages];
+                }
+            },
+        });
+
+        chatScrollToBottom();
+    }
+
+    function retryChatMessage(): void {
+        if (!chatRetry || chatStreaming) {
+            return;
+        }
+
+        const info = chatRetry;
+        chatRetry = null;
+
+        const userIdx = chatMessages.findIndex((m) => m.id === info.userMessageId);
+        const history = chatMessages.slice(0, userIdx + 1).map((m) => ({
+            role: m.role,
+            content: m.content,
+        }));
+
+        chatMessages = chatMessages.filter((m) => m.id !== info.failedMessageId);
+
+        const userMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            role: 'user',
+            content: info.text,
+        };
+        chatMessages = [...chatMessages, userMessage];
+        const assistantMessage: ChatMessage = {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: '',
+            html: '',
+            toolCalls: [],
+            isStreaming: true,
+        };
+        chatMessages = [...chatMessages, assistantMessage];
+        chatStreaming = true;
+
+        chatAbort = connectAssistantStream(
+            info.text,
+            history,
+            {
+                onText: (delta) => {
+                    const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+
+                    if (idx >= 0) {
+                        chatMessages[idx].content += delta;
+                        chatMessages[idx].html = parseMarkdownStreaming(chatMessages[idx].content);
+                        chatMessages = [...chatMessages];
+                    }
+                },
+                onDone: () => {
+                    const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+
+                    if (idx >= 0) {
+                        chatMessages[idx].isStreaming = false;
+                        chatMessages[idx].html = parseMarkdownStreaming(chatMessages[idx].content);
+                        chatStreaming = false;
+                        chatMessages = [...chatMessages];
+                    }
+                },
+                onError: (_error, _errorCode) => {
+                    const idx = chatMessages.findIndex((m) => m.id === assistantMessage.id);
+
+                    if (idx >= 0) {
+                        chatMessages[idx].isStreaming = false;
+                        chatStreaming = false;
+                        chatMessages = [...chatMessages];
+                    }
+                },
+            },
+            info.context,
+        );
+
+        chatScrollToBottom();
+    }
+
+    function stopChatStreaming(): void {
+        if (chatAbort) {
+            chatAbort.abort();
+            chatAbort = null;
+        }
+
+        const idx = chatMessages.findIndex((m) => m.isStreaming);
+
+        if (idx >= 0) {
+            chatMessages[idx].isStreaming = false;
+            chatMessages[idx].html = parseMarkdownStreaming(chatMessages[idx].content);
+            chatMessages = [...chatMessages];
+        }
+
+        chatStreaming = false;
+    }
+
+    $effect(() => {
+        chatScrollToBottom();
+    });
 
     function formatAmount(amount: number): string {
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 
@@ -96,7 +341,9 @@
 
         <!-- ① Quick add bar -->
         <div class="rounded-xl border border-hairline bg-card p-3 sm:p-4 dark:bg-card">
-            <form onsubmit={(e) => { e.preventDefault(); quickAdd(); }} class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <form onsubmit={(e) => {
+ e.preventDefault(); quickAdd(); 
+}} class="flex flex-col gap-2 sm:flex-row sm:items-center">
                 <div class="flex items-center gap-1 rounded-full bg-muted p-0.5">
                     <button
                         type="button"
@@ -404,26 +651,114 @@
             </div>
 
             <div class="flex flex-col rounded-xl border border-hairline bg-card dark:bg-card">
-                <div class="border-b border-hairline p-3 sm:p-4">
-                    <h3 class="text-sm font-semibold sm:text-base">{t('dashboard.chat')}</h3>
-                    <p class="text-[10px] text-muted-foreground sm:text-xs">{t('dashboard.chat_subtitle')}</p>
-                </div>
-                <div class="flex-1 space-y-2 overflow-y-auto p-3 min-h-[160px] max-h-[260px] sm:min-h-[200px] sm:max-h-[300px] sm:space-y-3 sm:p-4">
-                    {#each chatMessages as msg}
-                        <div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
-                            <div class="max-w-[85%] rounded-xl px-3 py-1.5 text-xs sm:max-w-[80%] sm:px-4 sm:py-2 sm:text-sm {msg.role === 'user' ? 'bg-brand-green text-brand-teal-deep' : 'bg-muted'}">
-                                {msg.content}
-                            </div>
+                <div class="flex items-center justify-between border-b border-hairline p-3 sm:p-4">
+                    <div class="flex items-center gap-2">
+                        <MessageSquare class="size-4 text-brand-green-dark dark:text-brand-green" />
+                        <div>
+                            <h3 class="text-sm font-semibold sm:text-base">{t('dashboard.chat')}</h3>
+                            <p class="text-[10px] text-muted-foreground sm:text-xs">{t('dashboard.chat_subtitle')}</p>
                         </div>
-                    {/each}
+                    </div>
+                    <a href="/assistant" class="inline-flex items-center gap-1 rounded-full border border-hairline px-2.5 py-1 text-[10px] font-medium text-muted-foreground hover:bg-muted/50 sm:text-xs">
+                        {t('dashboard.open_full_assistant')}
+                        <ExternalLink class="size-3" />
+                    </a>
+                </div>
+                <div class="flex-1 space-y-2 overflow-y-auto p-3 min-h-[180px] max-h-[280px] sm:min-h-[220px] sm:max-h-[330px] sm:space-y-3 sm:p-4" role="log" aria-live="polite" aria-atomic="false" bind:this={chatContainerRef}>
+                    {#if chatMessages.length === 0}
+                        <div class="flex h-full flex-col items-center justify-center text-center">
+                            <MessageSquare class="size-8 text-muted-foreground/40 mb-2" />
+                            <p class="text-xs text-muted-foreground sm:text-sm">{t('dashboard.chat_greeting')}</p>
+                        </div>
+                    {:else}
+                        {#each chatMessages as msg (msg.id)}
+                            <div class="flex {msg.role === 'user' ? 'justify-end' : 'justify-start'}">
+                                <div class="max-w-[90%] sm:max-w-[85%]">
+                                    <div class="{msg.role === 'user' ? 'bg-brand-green text-brand-teal-deep rounded-2xl' : 'bg-muted rounded-2xl'} px-3 py-2 text-xs sm:px-4 sm:py-2.5 sm:text-sm">
+                                        {#if msg.role === 'user'}
+                                            <p class="whitespace-pre-wrap">{msg.content}</p>
+                                        {:else}
+                                            <div class="md-content">
+                                                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                                                {@html msg.html ?? ''}
+                                            </div>
+                                        {/if}
+                                    </div>
+                                    {#if msg.toolCalls && msg.toolCalls.length > 0}
+                                        <div class="mt-1.5 flex flex-wrap gap-1">
+                                            {#each msg.toolCalls as tool (tool.id)}
+                                                <span class="inline-flex items-center gap-1 rounded-full border border-hairline bg-background px-2 py-0.5 text-[10px] text-muted-foreground">
+                                                    {#if tool.status === 'running'}
+                                                        <Loader2 class="size-3 animate-spin" />
+                                                    {:else if tool.status === 'completed'}
+                                                        <Check class="size-3 text-brand-green-dark dark:text-brand-green" />
+                                                    {:else}
+                                                        <X class="size-3 text-destructive" />
+                                                    {/if}
+                                                    {tool.name}
+                                                </span>
+                                            {/each}
+                                        </div>
+                                    {/if}
+                                    {#if chatRetry && chatRetry.failedMessageId === msg.id}
+                                        <div class="mt-1.5">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                class="h-7 px-2.5 text-[11px]"
+                                                onclick={retryChatMessage}
+                                            >
+                                                <RefreshCw class="size-3" />
+                                                {t('assistant.retry')}
+                                            </Button>
+                                        </div>
+                                    {/if}
+                                </div>
+                            </div>
+                        {/each}
+                    {/if}
                 </div>
                 <div class="border-t border-hairline p-2 sm:p-3">
-                    <form onsubmit={(e) => { e.preventDefault(); sendChatMessage(); }} class="flex gap-2">
-                        <Input placeholder={t('dashboard.chat_placeholder')} class="flex-1" bind:value={chatInput} />
-                        <Button type="submit" size="icon" disabled={!chatInput.trim()}>
-                            <Send class="size-3.5 sm:size-4" />
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <Input
+                                placeholder={t('assistant.placeholder')}
+                                class="pr-10"
+                                bind:value={chatInput}
+                                disabled={chatStreaming}
+                                onkeydown={(e) => {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            sendChatMessage();
+                                        }
+                                    }}
+                            />
+                            {#if chatStreaming}
+                                <button
+                                    type="button"
+                                    onclick={stopChatStreaming}
+                                    class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-destructive hover:bg-destructive/10"
+                                    aria-label={t('assistant.stop')}
+                                >
+                                    <X class="size-3.5" />
+                                </button>
+                            {/if}
+                        </div>
+                        <Button
+                            type="button"
+                            size="icon"
+                            class="shrink-0 rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90 disabled:opacity-50"
+                            disabled={chatStreaming || !chatInput.trim()}
+                            onclick={sendChatMessage}
+                        >
+                            {#if chatStreaming}
+                                <Loader2 class="size-3.5 animate-spin sm:size-4" />
+                            {:else}
+                                <Send class="size-3.5 sm:size-4" />
+                            {/if}
                         </Button>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -458,3 +793,124 @@
         {/if}
     </div>
 </PullToRefresh>
+
+<style>
+    .md-content :global(p) {
+        margin-block: 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.625;
+    }
+
+    .md-content :global(p:first-child) {
+        margin-top: 0;
+    }
+
+    .md-content :global(p:last-child) {
+        margin-bottom: 0;
+    }
+
+    .md-content :global(strong) {
+        font-weight: 600;
+    }
+
+    .md-content :global(ul),
+    .md-content :global(ol) {
+        margin-block: 0.5rem;
+        padding-inline-start: 1.25rem;
+        font-size: 0.875rem;
+        line-height: 1.625;
+    }
+
+    .md-content :global(li) {
+        margin-block: 0.25rem;
+    }
+
+    .md-content :global(h1),
+    .md-content :global(h2),
+    .md-content :global(h3),
+    .md-content :global(h4) {
+        margin-block: 0.75rem 0.5rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .md-content :global(h1) {
+        font-size: 1.125rem;
+    }
+
+    .md-content :global(h2) {
+        font-size: 1rem;
+    }
+
+    .md-content :global(h3) {
+        font-size: 0.9375rem;
+    }
+
+    .md-content :global(h4) {
+        font-size: 0.875rem;
+    }
+
+    .md-content :global(code) {
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.375rem;
+        background: var(--color-muted);
+        font-size: 0.8125rem;
+        direction: ltr;
+        unicode-bidi: embed;
+    }
+
+    .md-content :global(pre) {
+        margin-block: 0.5rem;
+        padding: 0.75rem;
+        overflow-x: auto;
+        border-radius: 0.5rem;
+        background: var(--color-muted);
+    }
+
+    .md-content :global(pre code) {
+        padding: 0;
+        background: transparent;
+    }
+
+    .md-content :global(blockquote) {
+        margin-block: 0.5rem;
+        padding-inline-start: 0.75rem;
+        border-inline-start: 2px solid var(--color-border);
+        color: var(--color-muted-foreground);
+    }
+
+    .md-content :global(table) {
+        width: 100%;
+        margin-block: 0.75rem;
+        border-collapse: collapse;
+        font-size: 0.8125rem;
+    }
+
+    .md-content :global(th),
+    .md-content :global(td) {
+        padding: 0.5rem 0.625rem;
+        text-align: start;
+        border: 1px solid var(--color-border);
+    }
+
+    .md-content :global(th) {
+        background: var(--color-muted);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .md-content :global(tbody tr:nth-child(even)) {
+        background: color-mix(in srgb, var(--color-muted) 45%, transparent);
+    }
+
+    .md-content :global(hr) {
+        margin-block: 0.75rem;
+        border: 0;
+        border-top: 1px solid var(--color-border);
+    }
+
+    .md-content :global(a) {
+        color: var(--color-primary);
+        text-decoration: underline;
+    }
+</style>

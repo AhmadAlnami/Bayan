@@ -18,8 +18,8 @@
     import { Button } from '@/components/ui/button';
     import { Label } from '@/components/ui/label';
     import { Spinner } from '@/components/ui/spinner';
-    import { store } from '@/routes/password/confirm';
     import { t } from '@/lib/locale.svelte';
+    import { store } from '@/routes/password/confirm';
 </script>
 
 <AppHead title={t('auth.confirm_password')} />

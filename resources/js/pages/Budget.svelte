@@ -8,22 +8,22 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
+    import AlarmClock from 'lucide-svelte/icons/alarm-clock';
+    import Calendar from 'lucide-svelte/icons/calendar';
+    import Check from 'lucide-svelte/icons/check';
+    import Pencil from 'lucide-svelte/icons/pencil';
+    import Plus from 'lucide-svelte/icons/plus';
+    import Receipt from 'lucide-svelte/icons/receipt';
+    import Trash2 from 'lucide-svelte/icons/trash-2';
+    import Wallet from 'lucide-svelte/icons/wallet';
     import AppHead from '@/components/AppHead.svelte';
+    import ConfirmDialog from '@/components/ConfirmDialog.svelte';
+    import PullToRefresh from '@/components/PullToRefresh.svelte';
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-    import Wallet from 'lucide-svelte/icons/wallet';
-    import Trash2 from 'lucide-svelte/icons/trash-2';
-    import Plus from 'lucide-svelte/icons/plus';
-    import Pencil from 'lucide-svelte/icons/pencil';
-    import Receipt from 'lucide-svelte/icons/receipt';
-    import AlarmClock from 'lucide-svelte/icons/alarm-clock';
-    import Check from 'lucide-svelte/icons/check';
-    import Calendar from 'lucide-svelte/icons/calendar';
     import { t, localizedName, localeState } from '@/lib/locale.svelte';
-    import PullToRefresh from '@/components/PullToRefresh.svelte';
-    import ConfirmDialog from '@/components/ConfirmDialog.svelte';
 
     const { locale } = localeState();
 
@@ -98,38 +98,56 @@
         if (bill.recurrence === 'weekly') {
             return (weekdayNames[bill.due_day] || weekdayNames[0])();
         }
+
         if (bill.recurrence === 'yearly' && bill.due_month) {
             return (monthNames[bill.due_month] || (() => ''))() + ' ' + bill.due_day;
         }
+
         return t('bills.day') + ' ' + bill.due_day;
     }
 
     function getBudget(type: string, categoryId: number | null = null) {
         return budgets.find((b: any) => {
-            if (type === 'category') return b.type === 'category' && b.category?.id === categoryId;
+            if (type === 'category') {
+return b.type === 'category' && b.category?.id === categoryId;
+}
+
             return b.type === type;
         });
     }
 
     function formatAmount(amount: number): string {
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 
     function saveBudget(type: string, amount: string, categoryId: string | null = null) {
-        if (!String(amount).trim()) return;
+        if (!String(amount).trim()) {
+return;
+}
+
         saving = true;
         const data: Record<string, any> = { type, amount: parseFloat(String(amount)) };
-        if (type === 'category' && categoryId) data.category_id = parseInt(categoryId);
+
+        if (type === 'category' && categoryId) {
+data.category_id = parseInt(categoryId);
+}
 
         router.post('/budgets', data, {
             preserveScroll: true,
             onFinish: () => {
                 saving = false;
-                if (type === 'daily') dailyAmount = '';
-                else if (type === 'weekly') weeklyAmount = '';
-                else if (type === 'monthly') monthlyAmount = '';
-                else if (type === 'category') { categoryAmount = ''; selectedCategoryId = ''; }
+
+                if (type === 'daily') {
+dailyAmount = '';
+} else if (type === 'weekly') {
+weeklyAmount = '';
+} else if (type === 'monthly') {
+monthlyAmount = '';
+} else if (type === 'category') {
+ categoryAmount = ''; selectedCategoryId = ''; 
+}
             },
         });
     }
@@ -139,8 +157,14 @@
     }
 
     function getProgressColor(progress: number) {
-        if (progress >= 100) return 'bg-destructive';
-        if (progress >= 80) return 'bg-accent-orange';
+        if (progress >= 100) {
+return 'bg-destructive';
+}
+
+        if (progress >= 80) {
+return 'bg-accent-orange';
+}
+
         return 'bg-brand-green';
     }
 
@@ -149,11 +173,18 @@
     }
 
     function doDelete() {
-        if (!deleteTarget) return;
+        if (!deleteTarget) {
+return;
+}
+
         if (deleteTarget.type === 'budget') {
-            router.delete(`/budgets/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => { showDeleteConfirm = false; } });
+            router.delete(`/budgets/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => {
+ showDeleteConfirm = false; 
+} });
         } else if (deleteTarget.type === 'bill') {
-            router.delete(`/bills/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => { showDeleteConfirm = false; } });
+            router.delete(`/bills/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => {
+ showDeleteConfirm = false; 
+} });
         }
     }
 
@@ -172,6 +203,7 @@
             billName = ''; billAmount = ''; billCategory = ''; billDueDay = '1';
             billDueMonth = ''; billReminder = '3'; billRecurrence = 'monthly';
         }
+
         showBillModal = true;
     }
 
@@ -182,15 +214,20 @@
             due_day: parseInt(billDueDay), due_month: billDueMonth ? parseInt(billDueMonth) : undefined,
             reminder_days: parseInt(billReminder), recurrence: billRecurrence,
         };
+
         if (editingBillId) {
             router.patch(`/bills/${editingBillId}`, data, {
                 preserveScroll: true, preserveState: true,
-                onFinish: () => { billLoading = false; showBillModal = false; },
+                onFinish: () => {
+ billLoading = false; showBillModal = false; 
+},
             });
         } else {
             router.post('/bills', data, {
                 preserveScroll: true, preserveState: true,
-                onFinish: () => { billLoading = false; showBillModal = false; },
+                onFinish: () => {
+ billLoading = false; showBillModal = false; 
+},
             });
         }
     }
@@ -201,9 +238,17 @@
 
     function getDaysUntilDue(dueDay: number): string {
         const today = new Date().getDate();
-        if (dueDay === today) return t('bills.due_today');
-        if (dueDay > today) return dueDay - today + ' ' + t('bills.days_left');
+
+        if (dueDay === today) {
+return t('bills.due_today');
+}
+
+        if (dueDay > today) {
+return dueDay - today + ' ' + t('bills.days_left');
+}
+
         const dim = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+
         return (dim - today + dueDay) + ' ' + t('bills.days_left');
     }
 
@@ -262,7 +307,9 @@
                     {/if}
                     <div class="mt-3 border-t border-hairline pt-3 sm:mt-4 sm:pt-4">
                         <p class="mb-2 text-xs text-muted-foreground sm:text-sm">{dailyBudget ? t('budgets.update_budget') : t('budgets.set_daily')}</p>
-                        <form onsubmit={(e) => { e.preventDefault(); saveBudget('daily', dailyAmount); }} class="flex gap-2">
+                        <form onsubmit={(e) => {
+ e.preventDefault(); saveBudget('daily', dailyAmount); 
+}} class="flex gap-2">
                             <Input type="number" step="0.01" placeholder={t('budgets.amount')} bind:value={dailyAmount} class="flex-1" />
                             <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={saving || !String(dailyAmount).trim()}>{t('budgets.save')}</Button>
                         </form>
@@ -296,7 +343,9 @@
                     {/if}
                     <div class="mt-3 border-t border-hairline pt-3 sm:mt-4 sm:pt-4">
                         <p class="mb-2 text-xs text-muted-foreground sm:text-sm">{weeklyBudget ? t('budgets.update_budget') : t('budgets.set_weekly')}</p>
-                        <form onsubmit={(e) => { e.preventDefault(); saveBudget('weekly', weeklyAmount); }} class="flex gap-2">
+                        <form onsubmit={(e) => {
+ e.preventDefault(); saveBudget('weekly', weeklyAmount); 
+}} class="flex gap-2">
                             <Input type="number" step="0.01" placeholder={t('budgets.amount')} bind:value={weeklyAmount} class="flex-1" />
                             <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={saving || !String(weeklyAmount).trim()}>{t('budgets.save')}</Button>
                         </form>
@@ -330,7 +379,9 @@
                     {/if}
                     <div class="mt-3 border-t border-hairline pt-3 sm:mt-4 sm:pt-4">
                         <p class="mb-2 text-xs text-muted-foreground sm:text-sm">{monthlyBudget ? t('budgets.update_budget') : t('budgets.set_monthly')}</p>
-                        <form onsubmit={(e) => { e.preventDefault(); saveBudget('monthly', monthlyAmount); }} class="flex gap-2">
+                        <form onsubmit={(e) => {
+ e.preventDefault(); saveBudget('monthly', monthlyAmount); 
+}} class="flex gap-2">
                             <Input type="number" step="0.01" placeholder={t('budgets.amount')} bind:value={monthlyAmount} class="flex-1" />
                             <Button type="submit" class="rounded-full bg-brand-green text-brand-teal-deep hover:bg-brand-green/90" disabled={saving || !String(monthlyAmount).trim()}>{t('budgets.save')}</Button>
                         </form>
@@ -368,7 +419,9 @@
                 {/if}
                 <div class="animate-fade-in-up rounded-xl border border-hairline bg-card p-4 dark:bg-card sm:p-6">
                     <p class="mb-3 text-xs font-medium text-muted-foreground sm:text-sm">{t('budgets.set_budget')}</p>
-                    <form onsubmit={(e) => { e.preventDefault(); saveBudget('category', categoryAmount, selectedCategoryId); }} class="space-y-3">
+                    <form onsubmit={(e) => {
+ e.preventDefault(); saveBudget('category', categoryAmount, selectedCategoryId); 
+}} class="space-y-3">
                         <select bind:value={selectedCategoryId} class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                             <option value="">{t('budgets.select_category')}</option>
                             {#each unusedCategories as c}
@@ -444,7 +497,9 @@
 <Dialog bind:open={showBillModal}>
     <DialogContent class="sm:max-w-md">
         <DialogHeader><DialogTitle>{editingBillId ? t('bills.edit_bill') : t('bills.add_bill')}</DialogTitle></DialogHeader>
-        <form onsubmit={(e) => { e.preventDefault(); saveBill(); }} class="space-y-4">
+        <form onsubmit={(e) => {
+ e.preventDefault(); saveBill(); 
+}} class="space-y-4">
             <div><Label for="billName">{t('bills.bill_name')}</Label><Input id="billName" bind:value={billName} required /></div>
             <div><Label for="billAmount">{t('bills.amount')}</Label><Input id="billAmount" type="number" step="0.01" bind:value={billAmount} required /></div>
             <div><Label for="billCategory">{t('bills.category_label')}</Label>

@@ -6,21 +6,21 @@
 
 <script lang="ts">
     import { router } from '@inertiajs/svelte';
-    import AppHead from '@/components/AppHead.svelte';
-    import { Button } from '@/components/ui/button';
-    import { Input } from '@/components/ui/input';
-    import { Label } from '@/components/ui/label';
-    import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
-    import Plus from 'lucide-svelte/icons/plus';
-    import Trash2 from 'lucide-svelte/icons/trash-2';
+    import Calendar from 'lucide-svelte/icons/calendar';
     import Pencil from 'lucide-svelte/icons/pencil';
     import PiggyBank from 'lucide-svelte/icons/piggy-bank';
+    import Plus from 'lucide-svelte/icons/plus';
     import Target from 'lucide-svelte/icons/target';
-    import Calendar from 'lucide-svelte/icons/calendar';
+    import Trash2 from 'lucide-svelte/icons/trash-2';
     import TrendingUp from 'lucide-svelte/icons/trending-up';
-    import { t, localizedName, localeState } from '@/lib/locale.svelte';
-    import PullToRefresh from '@/components/PullToRefresh.svelte';
+    import AppHead from '@/components/AppHead.svelte';
     import ConfirmDialog from '@/components/ConfirmDialog.svelte';
+    import PullToRefresh from '@/components/PullToRefresh.svelte';
+    import { Button } from '@/components/ui/button';
+    import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
+    import { Input } from '@/components/ui/input';
+    import { Label } from '@/components/ui/label';
+    import { t, localizedName, localeState } from '@/lib/locale.svelte';
 
     const { locale } = localeState();
 
@@ -83,7 +83,9 @@
             method: editingId ? 'patch' : 'post',
             data,
             preserveScroll: true,
-            onFinish: () => { loading = false; showModal = false; },
+            onFinish: () => {
+ loading = false; showModal = false; 
+},
         });
     }
 
@@ -92,13 +94,22 @@
     }
 
     function doDelete() {
-        if (!deleteTarget) return;
-        router.delete(`/savings/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => { showDeleteConfirm = false; } });
+        if (!deleteTarget) {
+return;
+}
+
+        router.delete(`/savings/${deleteTarget.id}`, { preserveScroll: true, onFinish: () => {
+ showDeleteConfirm = false; 
+} });
     }
 
     function deposit(goalId: number) {
         const amount = parseFloat(String(depositAmount));
-        if (!amount || amount <= 0) return;
+
+        if (!amount || amount <= 0) {
+return;
+}
+
         depositLoading = true;
         router.post(`/savings/${goalId}/deposit`, {
             amount,
@@ -114,25 +125,37 @@
 
     function formatAmount(amount: number): string {
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return new Intl.NumberFormat(numLocale).format(amount) + ' ' + t('common.sar');
     }
 
     function formatDate(dateStr: string): string {
         const d = new Date(dateStr);
         const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
         return d.toLocaleDateString(numLocale, { year: 'numeric', month: 'short', day: 'numeric' });
     }
 
     function getProgressColor(progress: number) {
-        if (progress >= 100) return 'bg-brand-green';
-        if (progress >= 50) return 'bg-accent-blue';
+        if (progress >= 100) {
+return 'bg-brand-green';
+}
+
+        if (progress >= 50) {
+return 'bg-accent-blue';
+}
+
         return 'bg-accent-orange';
     }
 
     function getDaysLeft(deadline: string | null): number | null {
-        if (!deadline) return null;
+        if (!deadline) {
+return null;
+}
+
         const d = new Date(deadline);
         const now = new Date();
+
         return Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     }
 
@@ -251,7 +274,9 @@
                                     </Button>
                                 </div>
                             {:else}
-                                <Button variant="outline" size="sm" class="rounded-full h-7 text-xs" onclick={() => { depositGoalId = goal.id; depositAmount = ''; }}>
+                                <Button variant="outline" size="sm" class="rounded-full h-7 text-xs" onclick={() => {
+ depositGoalId = goal.id; depositAmount = ''; 
+}}>
                                     <Plus class="size-3 mr-1" /> {t('savings.deposit')}
                                 </Button>
                             {/if}
@@ -278,7 +303,9 @@
         <DialogHeader>
             <DialogTitle>{editingId ? t('savings.edit_goal') : t('savings.add_goal')}</DialogTitle>
         </DialogHeader>
-        <form onsubmit={(e) => { e.preventDefault(); save(); }} class="space-y-4">
+        <form onsubmit={(e) => {
+ e.preventDefault(); save(); 
+}} class="space-y-4">
             <div>
                 <Label for="goalName">{t('savings.goal_name')}</Label>
                 <Input id="goalName" bind:value={formName} required />

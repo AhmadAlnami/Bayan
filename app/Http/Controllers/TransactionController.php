@@ -39,9 +39,7 @@ class TransactionController extends Controller
                 ] : null,
             ]);
 
-        $categories = Category::where(function ($q) use ($request) {
-            $q->whereNull('user_id')->orWhere('user_id', $request->user()->id);
-        })
+        $categories = Category::availableFor($request->user())
             ->where('type', $type)
             ->get()
             ->map(fn ($c) => [
@@ -81,10 +79,10 @@ class TransactionController extends Controller
         }
 
         $autoCategorizer = new AutoCategorizer;
-        $categoryId = $autoCategorizer->categorize($description, $request->type);
+        $categoryId = $autoCategorizer->categorize($description, $request->type, $request->user());
 
         if (! $categoryId) {
-            $categoryId = Category::where('type', $request->type)->whereNull('user_id')->where('name', 'أخرى')->first()?->id;
+            $categoryId = Category::availableFor($request->user())->where('type', $request->type)->where('name', 'أخرى')->first()?->id;
         }
 
         $request->user()->transactions()->create([
@@ -120,26 +118,31 @@ class TransactionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:0.01', 'description' => 'required|string|max:255',
-            'transaction_date' => 'required|date', 'category_id' => 'nullable|exists:categories,id',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'nullable|string|max:255',
+            'transaction_date' => 'required|date',
+            'category_id' => 'nullable|exists:categories,id',
             'type' => 'required|in:expense,income',
         ]);
 
         if (empty($validated['category_id'])) {
             $autoCategorizer = new AutoCategorizer;
-            $validated['category_id'] = $autoCategorizer->categorize($validated['description'], $validated['type']);
+            $validated['category_id'] = $autoCategorizer->categorize($validated['description'], $validated['type'], $request->user());
         }
+
+        $locale = app()->getLocale();
+        $validated['description'] = $validated['description'] ?? ($locale === 'en' ? 'Quick transaction' : 'معاملة سريعة');
 
         $request->user()->transactions()->create($validated);
 
-        $locale = app()->getLocale();
         $categoryName = $locale === 'en'
             ? (Category::find($validated['category_id'])?->name_en ?? '')
             : (Category::find($validated['category_id'])?->name ?? '');
 
+        $description = $validated['description'];
         $message = $locale === 'en'
-            ? 'Added: '.$validated['description'].($categoryName ? ' - '.$categoryName : '')
-            : 'تمت الإضافة: '.$validated['description'].($categoryName ? ' - '.$categoryName : '');
+            ? 'Added: '.$description.($categoryName ? ' - '.$categoryName : '')
+            : 'تمت الإضافة: '.$description.($categoryName ? ' - '.$categoryName : '');
 
         if ($validated['type'] === 'expense') {
             $budgetWarning = $this->checkBudgetExceeded($request->user());
@@ -162,8 +165,10 @@ class TransactionController extends Controller
             return Redirect::back()->with('toast', ['type' => 'error', 'message' => app()->getLocale() === 'en' ? 'You are not authorized to do this.' : 'غير مصرح لك بتنفيذ هذا الإجراء']);
         }
         $validated = $request->validate([
-            'amount' => 'required|numeric|min:0.01', 'description' => 'required|string|max:255',
-            'transaction_date' => 'required|date', 'category_id' => 'nullable|exists:categories,id',
+            'amount' => 'required|numeric|min:0.01',
+            'description' => 'nullable|string|max:255',
+            'transaction_date' => 'required|date',
+            'category_id' => 'nullable|exists:categories,id',
         ]);
         $transaction->update($validated);
 

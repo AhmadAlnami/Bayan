@@ -1,7 +1,7 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
-    import type { Snippet } from 'svelte';
     import Wallet from 'lucide-svelte/icons/wallet';
+    import type { Snippet } from 'svelte';
     import { t } from '@/lib/locale.svelte';
     import { home } from '@/routes';
 

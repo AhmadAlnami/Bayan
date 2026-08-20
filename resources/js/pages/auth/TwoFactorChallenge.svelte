@@ -9,8 +9,8 @@
         InputOTPGroup,
         InputOTPSlot,
     } from '@/components/ui/input-otp';
-    import { store } from '@/routes/two-factor/login';
     import { t } from '@/lib/locale.svelte';
+    import { store } from '@/routes/two-factor/login';
     import type { TwoFactorConfigContent } from '@/types';
 
     let showRecoveryInput = $state(false);

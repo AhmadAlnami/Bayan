@@ -14,8 +14,8 @@
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import { Spinner } from '@/components/ui/spinner';
-    import { update } from '@/routes/password';
     import { t } from '@/lib/locale.svelte';
+    import { update } from '@/routes/password';
 
     let {
         token,

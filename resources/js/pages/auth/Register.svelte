@@ -15,9 +15,9 @@
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
     import { Spinner } from '@/components/ui/spinner';
+    import { t } from '@/lib/locale.svelte';
     import { login } from '@/routes';
     import { store } from '@/routes/register';
-    import { t } from '@/lib/locale.svelte';
 
     let { passwordRules }: { passwordRules: string } = $props();
 </script>

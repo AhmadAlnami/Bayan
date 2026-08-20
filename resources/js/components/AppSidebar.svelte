@@ -1,14 +1,13 @@
 <script lang="ts">
     import { Link } from '@inertiajs/svelte';
+    import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
+    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
     import BookOpen from 'lucide-svelte/icons/book-open';
+    import FileText from 'lucide-svelte/icons/file-text';
     import FolderGit2 from 'lucide-svelte/icons/folder-git-2';
     import LayoutGrid from 'lucide-svelte/icons/layout-grid';
-    import ArrowUpRight from 'lucide-svelte/icons/arrow-up-right';
-    import ArrowDownLeft from 'lucide-svelte/icons/arrow-down-left';
-    import FileText from 'lucide-svelte/icons/file-text';
+    import MessageSquare from 'lucide-svelte/icons/message-square';
     import PiggyBank from 'lucide-svelte/icons/piggy-bank';
-    import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
-    import Target from 'lucide-svelte/icons/target';
     import type { Snippet } from 'svelte';
     import AppLogo from '@/components/AppLogo.svelte';
     import NavFooter from '@/components/NavFooter.svelte';
@@ -23,6 +22,7 @@
         SidebarMenuButton,
         SidebarMenuItem,
     } from '@/components/ui/sidebar';
+    import { t } from '@/lib/locale.svelte';
     import { toUrl } from '@/lib/utils';
     import { dashboard } from '@/routes';
     import type { NavItem } from '@/types';
@@ -35,29 +35,34 @@
 
     const mainNavItems: NavItem[] = [
         {
-            title: 'لوحة التحكم',
+            title: t('nav.dashboard'),
             href: dashboard(),
             icon: LayoutGrid,
         },
         {
-            title: 'المصروفات',
+            title: t('nav.expenses'),
             href: '/transactions/expenses',
             icon: ArrowUpRight,
         },
         {
-            title: 'الدخل',
+            title: t('nav.income'),
             href: '/transactions/income',
             icon: ArrowDownLeft,
         },
         {
-            title: 'أهداف الادخار',
+            title: t('savings.title'),
             href: '/savings',
             icon: PiggyBank,
         },
         {
-            title: 'التقارير',
+            title: t('reports.title'),
             href: '/reports',
             icon: FileText,
+        },
+        {
+            title: t('assistant.title'),
+            href: '/assistant',
+            icon: MessageSquare,
         },
     ];
 
@@ -81,10 +86,7 @@
             <SidebarMenuItem>
                 <SidebarMenuButton size="lg" asChild>
                     {#snippet children(props)}
-                        <Link
-                            {...props}
-                            href={toUrl(dashboard())}
-                        >
+                        <Link {...props} href={toUrl(dashboard())}>
                             <AppLogo />
                         </Link>
                     {/snippet}

@@ -1,9 +1,9 @@
 <script lang="ts">
     import { Link, router } from '@inertiajs/svelte';
-    import LogOut from 'lucide-svelte/icons/log-out';
-    import Settings from 'lucide-svelte/icons/settings';
     import FileText from 'lucide-svelte/icons/file-text';
+    import LogOut from 'lucide-svelte/icons/log-out';
     import PiggyBank from 'lucide-svelte/icons/piggy-bank';
+    import Settings from 'lucide-svelte/icons/settings';
     import {
         DropdownMenuGroup,
         DropdownMenuItem,

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Category;
+use App\Models\User;
 use Illuminate\Support\Str;
 
 class AutoCategorizer
@@ -25,7 +26,7 @@ class AutoCategorizer
         'مبيعات' => ['بيع', 'مبيعات', 'تجارة', 'تجاره', 'سلعة', 'سلعه', 'sale', 'sales'],
     ];
 
-    public function categorize(string $description, string $type = 'expense'): ?int
+    public function categorize(string $description, string $type = 'expense', ?User $user = null): ?int
     {
         $desc = Str::lower(trim($description));
         $keywords = $type === 'income' ? $this->incomeKeywords : $this->expenseKeywords;
@@ -47,16 +48,16 @@ class AutoCategorizer
         }
 
         if ($bestCategory === null) {
-            $fallback = Category::where('type', $type)
-                ->whereNull('user_id')
+            $fallback = Category::when($user, fn ($q) => $q->availableFor($user))
+                ->where('type', $type)
                 ->where('name', 'أخرى')
                 ->first();
 
             return $fallback?->id;
         }
 
-        $category = Category::where('type', $type)
-            ->whereNull('user_id')
+        $category = Category::when($user, fn ($q) => $q->availableFor($user))
+            ->where('type', $type)
             ->where('name', $bestCategory)
             ->first();
 

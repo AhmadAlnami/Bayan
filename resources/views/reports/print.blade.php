@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ config('app.name') }} - {{ $periodLabel }} - {{ $reportLabel }}</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
     <style>
         @page {
             size: A4;
@@ -219,11 +219,20 @@
             }
         }
 
-        .print-btn {
-            position: fixed;
-            top: 16px;
-            {{ $locale === 'ar' ? 'left' : 'right' }}: 16px;
+        .toolbar {
+            position: sticky;
+            top: 0;
             z-index: 999;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 18px;
+        }
+
+        .print-btn {
             background: #00a86b;
             color: #fff;
             border: none;
@@ -233,13 +242,120 @@
             font-weight: 600;
             cursor: pointer;
         }
+
+        @media screen and (max-width: 700px) {
+            body {
+                padding: 16px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .header .subtitle {
+                font-size: 13px;
+            }
+
+            .summary {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .summary-card {
+                padding: 10px;
+            }
+
+            .summary-card .value {
+                font-size: 16px;
+            }
+
+            .charts-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .chart-box {
+                padding: 12px;
+            }
+
+            .chart-box canvas {
+                max-height: 200px;
+            }
+
+            .top-expense-item {
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+
+            thead {
+                display: none;
+            }
+
+            table,
+            tbody,
+            tr,
+            td {
+                display: block;
+                width: 100%;
+            }
+
+            tr {
+                border: 1px solid #e2e8f0;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                padding: 4px 0;
+                background: #fff;
+            }
+
+            td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+                border-bottom: 1px dashed #e8edf0;
+                text-align: start;
+            }
+
+            td:last-child {
+                border-bottom: none;
+            }
+
+            td.amount-cell {
+                text-align: start !important;
+            }
+
+            td:before {
+                content: attr(data-label);
+                font-size: 10px;
+                font-weight: 600;
+                color: #888;
+                white-space: nowrap;
+            }
+
+            .print-btn {
+                padding: 8px 18px;
+                font-size: 12px;
+            }
+
+            .footer {
+                font-size: 10px;
+            }
+        }
+
+        @media print {
+            body {
+                padding: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
-<button class="print-btn no-print" onclick="window.print()">
-    {{ $locale === 'ar' ? 'طباعة / حفظ PDF' : 'Print / Save PDF' }}
-</button>
+<div class="toolbar no-print">
+    <button class="print-btn" onclick="window.print()">
+        {{ $locale === 'ar' ? 'طباعة / حفظ PDF' : 'Print / Save PDF' }}
+    </button>
+</div>
 
 <div class="header">
     <h1><span class="brand">{{ config('app.name') }}</span> - {{ $periodLabel }}</h1>
@@ -367,19 +483,19 @@
     <tbody>
         @foreach ($transactions as $tx)
         <tr>
-            <td style="white-space:nowrap;">{{ $tx['transaction_date'] }}</td>
-            <td>
+            <td data-label="{{ $dateLabel }}" style="white-space:nowrap;">{{ $tx['transaction_date'] }}</td>
+            <td data-label="{{ $descLabel }}">
                 <span class="type-icon {{ $tx['type'] }}">{{ $tx['type'] === 'expense' ? ($locale === 'ar' ? '—' : '−') : '+' }}</span>
                 {{ $tx['description'] ?: '—' }}
             </td>
-            <td>
+            <td data-label="{{ $catHeaderLabel }}">
                 @if ($tx['category'])
                     <span class="category-badge"><span class="category-dot" style="background:{{ $tx['category']['color'] }}"></span>{{ $locale === 'ar' ? $tx['category']['name'] : $tx['category']['name_en'] }}</span>
                 @else
                     <span class="text-muted">—</span>
                 @endif
             </td>
-            <td class="amount-cell {{ $tx['type'] }}" style="text-align: {{ $locale === 'ar' ? 'left' : 'right' }}; white-space:nowrap;">
+            <td data-label="{{ $amountLabel }}" class="amount-cell {{ $tx['type'] }}" style="text-align: {{ $locale === 'ar' ? 'left' : 'right' }}; white-space:nowrap;">
                 {{ fmt($tx['amount'], $locale) }} {{ $sarLabel }}
             </td>
         </tr>
@@ -392,9 +508,10 @@
 </div>
 
 <script>
-    const isRtl = document.dir === 'rtl';
+    window.addEventListener('DOMContentLoaded', () => {
+        const isRtl = document.dir === 'rtl';
 
-    const barCtx = document.getElementById('barChart').getContext('2d');
+        const barCtx = document.getElementById('barChart').getContext('2d');
     const barDatasets = [{
         label: '{{ $expenseLabel }}',
         data: @json($chartExpenses),
@@ -451,6 +568,7 @@
         },
     });
     @endif
+    });
 </script>
 
 </body>

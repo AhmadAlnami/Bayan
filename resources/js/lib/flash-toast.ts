@@ -9,7 +9,10 @@ export function initializeFlashToast(): void {
         setTimeout(() => {
             const page = usePage();
             const toastData = page.props.toast as FlashToast | null;
-            if (!toastData || !toastData.message) return;
+
+            if (!toastData || !toastData.message) {
+return;
+}
 
             const id = `toast-${++toastCounter}-${Date.now()}`;
             toast[toastData.type](toastData.message, { id });

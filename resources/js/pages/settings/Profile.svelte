@@ -22,8 +22,8 @@
     import { Button } from '@/components/ui/button';
     import { Input } from '@/components/ui/input';
     import { Label } from '@/components/ui/label';
-    import { send } from '@/routes/verification';
     import { t } from '@/lib/locale.svelte';
+    import { send } from '@/routes/verification';
 
     const user = $derived(page.props.auth.user);
 </script>

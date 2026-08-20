@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { Button } from '@/components/ui/button';
     import {
         AlertDialog,
         AlertDialogAction,
@@ -10,6 +9,7 @@
         AlertDialogHeader,
         AlertDialogTitle,
     } from '@/components/ui/alert-dialog';
+    import { Button } from '@/components/ui/button';
     import { t } from '@/lib/locale.svelte';
 
     let {

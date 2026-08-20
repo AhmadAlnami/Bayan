@@ -1,8 +1,8 @@
 <script lang="ts">
     import type { Snippet } from 'svelte';
     import AppShell from '@/components/AppShell.svelte';
-    import TopNav from '@/components/TopNav.svelte';
     import BottomNav from '@/components/BottomNav.svelte';
+    import TopNav from '@/components/TopNav.svelte';
     import { Toaster } from '@/components/ui/sonner';
     import type { BreadcrumbItem } from '@/types';
 

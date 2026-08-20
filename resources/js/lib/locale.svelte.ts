@@ -1,5 +1,6 @@
 import { page } from '@inertiajs/svelte';
-import { translations, type Locale } from '@/lib/translations';
+import { translations  } from '@/lib/translations';
+import type {Locale} from '@/lib/translations';
 
 export type { Locale };
 
@@ -26,16 +27,21 @@ export function initializeLocale(): void {
 }
 
 function applyLocale(value: Locale): void {
-    if (typeof document === 'undefined') return;
+    if (typeof document === 'undefined') {
+return;
+}
+
     document.documentElement.setAttribute('dir', value === 'ar' ? 'rtl' : 'ltr');
     document.documentElement.setAttribute('lang', value);
 }
 
 export function updateLocale(value: Locale): void {
     locale.value = value;
+
     if (typeof window !== 'undefined') {
         localStorage.setItem('locale', value);
     }
+
     applyLocale(value);
 }
 
@@ -44,8 +50,14 @@ export function t(key: string): string {
 }
 
 export function localizedName(item: { name: string; name_en?: string } | null | undefined): string {
-    if (!item) return '';
-    if (locale.value === 'en' && item.name_en) return item.name_en;
+    if (!item) {
+return '';
+}
+
+    if (locale.value === 'en' && item.name_en) {
+return item.name_en;
+}
+
     return item.name;
 }
 
@@ -73,5 +85,6 @@ export function relativeDate(dateStr: string): string {
     }
 
     const numLocale = locale.value === 'ar' ? 'ar-SA' : 'en-US';
+
     return date.toLocaleDateString(numLocale, { year: 'numeric', month: 'short', day: 'numeric' });
 }

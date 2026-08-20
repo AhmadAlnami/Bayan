@@ -3,8 +3,8 @@
     import Moon from 'lucide-svelte/icons/moon';
     import Sun from 'lucide-svelte/icons/sun';
     import type { Component, SvelteComponent } from 'svelte';
-    import { themeState } from '@/lib/theme.svelte';
     import { t } from '@/lib/locale.svelte';
+    import { themeState } from '@/lib/theme.svelte';
     import type { Appearance } from '@/types';
 
     const { appearance, updateAppearance } = themeState();

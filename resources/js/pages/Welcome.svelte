@@ -1,14 +1,14 @@
 <script lang="ts">
     import { Link, page } from '@inertiajs/svelte';
-    import AppHead from '@/components/AppHead.svelte';
-    import { toUrl } from '@/lib/utils';
-    import { dashboard, login, register } from '@/routes';
-    import { t } from '@/lib/locale.svelte';
-    import Wallet from 'lucide-svelte/icons/wallet';
+    import ArrowLeft from 'lucide-svelte/icons/arrow-left';
     import BarChart3 from 'lucide-svelte/icons/bar-chart-3';
     import MessageCircle from 'lucide-svelte/icons/message-circle';
     import Shield from 'lucide-svelte/icons/shield';
-    import ArrowLeft from 'lucide-svelte/icons/arrow-left';
+    import Wallet from 'lucide-svelte/icons/wallet';
+    import AppHead from '@/components/AppHead.svelte';
+    import { t } from '@/lib/locale.svelte';
+    import { toUrl } from '@/lib/utils';
+    import { dashboard, login, register } from '@/routes';
 
     const auth = $derived(page.props.auth);
 </script>

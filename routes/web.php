@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AssistantController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
@@ -8,6 +9,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\SavingsController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::inertia('/', 'Welcome')->name('home');
 
@@ -48,6 +50,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('savings/{savingsGoal}', [SavingsController::class, 'update'])->name('savings.update');
     Route::delete('savings/{savingsGoal}', [SavingsController::class, 'destroy'])->name('savings.destroy');
     Route::post('savings/{savingsGoal}/deposit', [SavingsController::class, 'deposit'])->name('savings.deposit');
+
+    Route::get('assistant', fn () => Inertia::render('Assistant'))->name('assistant');
+    Route::post('assistant/stream', [AssistantController::class, 'stream'])->name('assistant.stream');
 });
 
 require __DIR__.'/settings.php';
